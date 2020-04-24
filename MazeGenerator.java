@@ -23,16 +23,6 @@ public class MazeGenerator {
 		generateMaze(0, 0);
 	}
 
-	class Pair {
-		int x;
-		int y;
-
-		Pair(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
-
 	public void display() {
 		for (int i = 0; i < y; i++) {
 			// draw the north edge
@@ -53,25 +43,50 @@ public class MazeGenerator {
 		System.out.println("+");
 	}
 
-	private void generateMaze(int startx, int starty) {
-		Stack<Pair> queue = new Stack<>();
-		queue.add(new Pair(startx, starty));
+	class StackEntry {
+		int x;
+		int y;
 		DIR[] dirs = DIR.values();
-		while (queue.size() > 0) {
-			Pair now = queue.pop();
+		int currentIndex = 0;
+
+		StackEntry(int x, int y) {
+			this.x = x;
+			this.y = y;
+			Collections.shuffle(Arrays.asList(dirs));
+		}
+
+		DIR getNextDir() {
+			if (currentIndex < dirs.length) {
+				DIR ret = dirs[currentIndex];
+				currentIndex++;
+				return ret;
+			} else {
+				return null;
+			}
+		}
+	}
+
+	private void generateMaze(int startx, int starty) {
+		Stack<StackEntry> stk = new Stack<>();
+		stk.add(new StackEntry(startx, starty));
+		while (stk.size() > 0) {
+			StackEntry now = stk.peek();
 			int cx = now.x;
 			int cy = now.y;
-			Collections.shuffle(Arrays.asList(dirs));
-			for (DIR dir : dirs) {
+			DIR dir = now.getNextDir();
+			if (dir == null) {
+				stk.pop();
+			} else {
 				int nx = cx + dir.dx;
 				int ny = cy + dir.dy;
 				if (between(nx, x) && between(ny, y) && (maze[nx][ny] == 0)) {
 					maze[cx][cy] |= dir.bit;
 					maze[nx][ny] |= dir.opposite.bit;
 					// generateMaze(nx, ny);
-					queue.add(new Pair(nx, ny));
+					stk.add(new StackEntry(nx, ny));
 				}
 			}
+
 		}
 	}
 
@@ -106,7 +121,7 @@ public class MazeGenerator {
 		int x = args.length >= 1 ? (Integer.parseInt(args[0])) : 8;
 		int y = args.length == 2 ? (Integer.parseInt(args[1])) : 8;
 		MazeGenerator maze = new MazeGenerator(x, y);
-		// maze.display();
+		maze.display();
 	}
 
 }
