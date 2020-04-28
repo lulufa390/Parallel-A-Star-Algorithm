@@ -1,8 +1,6 @@
 // package org.rosettacode;
 
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 import java.util.Arrays;
 
@@ -15,6 +13,9 @@ public class MazeGenerator {
 	private final int x;
 	private final int y;
 	private final int[][] maze;
+
+	private int destX;
+	private int destY;
 
 	public MazeGenerator(int x, int y) {
 		this.x = x;
@@ -32,7 +33,12 @@ public class MazeGenerator {
 			System.out.println("+");
 			// draw the west edge
 			for (int j = 0; j < x; j++) {
-				System.out.print((maze[j][i] & 8) == 0 ? "|   " : "    ");
+				if (i == destX && j == destY) {
+					System.out.print((maze[j][i] & 8) == 0 ? "| * " : "  * ");
+				} else {
+					System.out.print((maze[j][i] & 8) == 0 ? "|   " : "    ");
+				}
+				
 			}
 			System.out.println("|");
 		}
@@ -49,9 +55,12 @@ public class MazeGenerator {
 		DIR[] dirs = DIR.values();
 		int currentIndex = 0;
 
-		StackEntry(int x, int y) {
+		int depth;
+
+		StackEntry(int x, int y, int depth) {
 			this.x = x;
 			this.y = y;
+			this.depth = depth;
 			Collections.shuffle(Arrays.asList(dirs));
 		}
 
@@ -68,12 +77,19 @@ public class MazeGenerator {
 
 	private void generateMaze(int startx, int starty) {
 		Stack<StackEntry> stk = new Stack<>();
-		stk.add(new StackEntry(startx, starty));
+		stk.add(new StackEntry(startx, starty, 0));
+		int maxDepth = -1;
 		while (stk.size() > 0) {
 			StackEntry now = stk.peek();
 			int cx = now.x;
 			int cy = now.y;
+			int depth = now.depth;
 			DIR dir = now.getNextDir();
+			if (depth >= maxDepth) {
+				maxDepth = depth;
+				destX = cx;
+				destY = cy;
+			}
 			if (dir == null) {
 				stk.pop();
 			} else {
@@ -82,8 +98,7 @@ public class MazeGenerator {
 				if (between(nx, x) && between(ny, y) && (maze[nx][ny] == 0)) {
 					maze[cx][cy] |= dir.bit;
 					maze[nx][ny] |= dir.opposite.bit;
-					// generateMaze(nx, ny);
-					stk.add(new StackEntry(nx, ny));
+					stk.add(new StackEntry(nx, ny, depth + 1));
 				}
 			}
 
