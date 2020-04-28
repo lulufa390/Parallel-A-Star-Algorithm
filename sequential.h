@@ -7,6 +7,6 @@
 
 #include "map.h"
 
-void find_path_sequential(Map* map);
+int find_path_sequential(Map* map);
 
 #endif //FINAL_SEQUENTIAL_H
