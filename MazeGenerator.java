@@ -1,7 +1,12 @@
 // package org.rosettacode;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Stack;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /*
@@ -33,12 +38,12 @@ public class MazeGenerator {
 			System.out.println("+");
 			// draw the west edge
 			for (int j = 0; j < x; j++) {
-				if (i == destX && j == destY) {
+				if (j == destX && i == destY) {
 					System.out.print((maze[j][i] & 8) == 0 ? "| * " : "  * ");
 				} else {
 					System.out.print((maze[j][i] & 8) == 0 ? "|   " : "    ");
 				}
-				
+
 			}
 			System.out.println("|");
 		}
@@ -132,10 +137,43 @@ public class MazeGenerator {
 		}
 	};
 
+	void outputMaze(String fileName) {
+		FileWriter output = null;
+		try {
+			output = new FileWriter(fileName);
+			output.write(String.format("%d %d\n", x, y));
+			output.write(String.format("0 0 %d %d\n", destX, destY));
+			for (int i = 0; i < y; i++) {
+				// draw the north edge
+				for (int j = 0; j < x; j++) {
+					output.write(String.format("%d %d", j, i));
+					List<DIR> thisDir = new ArrayList<>();
+					for (DIR dir: DIR.values()) {
+						if ((maze[j][i] & dir.bit) > 0) {
+							thisDir.add(dir);
+						}
+					}
+					output.write(" " + thisDir.size());
+					for (DIR dir: thisDir) {
+						output.write(" " + dir);
+					}
+					output.write("\n");
+				}
+			}
+			output.close();
+		} catch (Exception ex) {
+			ex.printStackTrace(System.out);
+		}
+	}
+
 	public static void main(String[] args) {
 		int x = args.length >= 1 ? (Integer.parseInt(args[0])) : 8;
-		int y = args.length == 2 ? (Integer.parseInt(args[1])) : 8;
+		int y = args.length >= 2 ? (Integer.parseInt(args[1])) : 8;
+		String outputName = args.length >= 3 ? (args[2]) : null;
 		MazeGenerator maze = new MazeGenerator(x, y);
+		if (outputName != null) {
+			maze.outputMaze(outputName);
+		}
 		maze.display();
 	}
 

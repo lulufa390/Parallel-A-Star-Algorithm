@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <cmath>
 #include <utility>
+#include <fstream>
 
 class Node
 {
@@ -25,13 +26,12 @@ public:
     int g2_value[2];
     int f2_value[2];
 
-    std::vector< std::pair<Node *, int> > adjacent_list;
+    std::vector<std::pair<Node *, int>> adjacent_list;
 
     Node *path_parent;
 
     bool is_goal;
     bool is_start;
-
 
     // extra information
 public:
@@ -62,13 +62,13 @@ public:
     Node *start;
     Node *goal;
 
-    std::unordered_set<Node*> node_set;
+    std::unordered_set<Node *> node_set;
 
     bool is_reverse;
 
 public:
     // initialize from a 2-dimension map
-    Map(std::vector< std::vector<int> > matrix)
+    Map(std::vector<std::vector<int>> matrix)
     {
 
         if (matrix.empty())
@@ -79,7 +79,7 @@ public:
         int height = matrix.size();
         int width = matrix[0].size();
 
-        std::vector< std::vector<Node *> > node_matrix(height, std::vector<Node *>(width, nullptr));
+        std::vector<std::vector<Node *>> node_matrix(height, std::vector<Node *>(width, nullptr));
 
         // new nodes
         for (int i = 0; i < height; i++)
@@ -149,17 +149,103 @@ public:
         is_reverse = false;
     }
 
-    Map (const Map& map) {
+    Map(std::string fileName)
+    {
+        std::ifstream input(fileName, std::ifstream::in);
+        int height, width;
+        input >> width >> height;
+
+        int startX, startY, destX, destY;
+        input >> startX >> startY >> destX >> destY;
+
+        std::vector<std::vector<Node *>> node_matrix(height, std::vector<Node *>(width, nullptr));
+
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                Node *node = new Node(width * i + j);
+                node_set.insert(node);
+                node_matrix[i][j] = node;
+
+                node->x = i;
+                node->y = j;
+            }
+        }
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                int x, y;
+                input >> x >> y;
+                int count;
+                input >> count;
+                while (count--)
+                {
+                    char dir;
+                    input >> dir;
+                    int newX, newY;
+                    switch (dir)
+                    {
+                    case 'N':
+                        newX = x;
+                        newY = y - 1;
+                        break;
+                    case 'S':
+                        newX = x;
+                        newY = y + 1;
+                        break;
+                    case 'E':
+                        newX = x + 1;
+                        newY = y;
+                        break;
+                    case 'W':
+                        newX = x - 1;
+                        newY = y;
+                        break;
+                    default:
+                        throw std::string("unknow direction");
+                    }
+                    node_matrix[y][x]->adjacent_list.push_back({node_matrix[newY][newX], 1});
+                }
+            }
+        }
+
+        node_matrix[startY][startX]->is_start = true;
+        start = node_matrix[startY][startX];
+
+        node_matrix[destY][destX]->is_goal = true;
+        goal = node_matrix[destY][destX];
+
+        // for (int i = 0; i < height; i++)
+        // {
+        //     for (int j = 0; j < width; j++)
+        //     {
+        //         std::cout << node_matrix[i][j]->node_id << " ";
+        //         for (auto item: node_matrix[i][j]->adjacent_list) {
+        //             std::cout << item.first->node_id << " ";
+        //         }
+        //         std::cout << std::endl;
+        //     }
+        // }
+
+    }
+
+    Map(const Map &map)
+    {
         start = map.start;
         goal = map.goal;
 
-        for (Node* node : map.node_set) {
+        for (Node *node : map.node_set)
+        {
             node_set.insert(node);
         }
     }
 
-    void reverse() {
-        Node* start_tmp = start;
+    void reverse()
+    {
+        Node *start_tmp = start;
         start = goal;
         goal = start_tmp;
         is_reverse = true;
