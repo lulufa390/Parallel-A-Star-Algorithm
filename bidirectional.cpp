@@ -17,7 +17,7 @@ int f[2];
 
 pthread_mutex_t lock;
 
-const int max_weight = 4096;
+const int max_weight = 4096 * 4096;
 
 
 void *myThreadFun(void *vargp) {

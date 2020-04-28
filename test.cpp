@@ -24,13 +24,9 @@ int main() {
     int size = 300;
 
     for (int i = 0; i < size; i++) {
-
-
         if (i % 2 && i < size - 1) {
             std::vector<int> line(size, 2);
-
             line[rand() % size] = 0;
-
             mat2.push_back(line);
         }
         else {
@@ -42,25 +38,20 @@ int main() {
 
     mat2[size - 1][size/2] = 3;
 
-    Map *map = new Map(mat2);
-
-
     clock_t start, stop;
     clock_t start2, stop2;
-    start = clock();
 
-//    int length = find_path_bidirectional(map);
-    int length1 = find_path_sequential(map);
+    // sequential
+    Map *map1 = new Map(mat2);
+    start = clock();
+    int length1 = find_path_sequential(map1);
     stop = clock();
 
-
-    Map *map22 = new Map(mat2);
+    // bidirectional
+    Map *map2 = new Map(mat2);
     start2 = clock();
-
-    int length2 = find_path_bidirectional(map22);
+    int length2 = find_path_bidirectional(map2);
     stop2 = clock();
-//    std::cout << length1 << std::endl;
-//    std::cout << length2 << std::endl;
 
 
     std::cout << "Sequential Total Time : " <<(double)(stop - start) / CLOCKS_PER_SEC << "s" << std::endl;
