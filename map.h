@@ -218,6 +218,8 @@ public:
         node_matrix[destY][destX]->is_goal = true;
         goal = node_matrix[destY][destX];
 
+        is_reverse = false;
+
         // for (int i = 0; i < height; i++)
         // {
         //     for (int j = 0; j < width; j++)

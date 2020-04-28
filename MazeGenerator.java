@@ -174,7 +174,7 @@ public class MazeGenerator {
 		if (outputName != null) {
 			maze.outputMaze(outputName);
 		}
-		maze.display();
+		// maze.display();
 	}
 
 }

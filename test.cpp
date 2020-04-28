@@ -7,9 +7,9 @@
 
 int main() {
 
-    Map *map = new Map("maze_3_3.txt");
-    find_path_sequential(map);
-    return 0;
+    // Map *map = new Map("maze_3_3.txt");
+    // find_path_sequential(map);
+    // return 0;
 
     std::vector<std::vector<int> > mat = {
             {0, 1, 2, 0, 0, 0, 0, 2, 0, 0},
@@ -47,14 +47,15 @@ int main() {
     clock_t start2, stop2;
 
     // sequential
-    Map *map1 = new Map(mat2);
+    // Map *map1 = new Map(mat2);
+    std::string test_file_name = "maze_case/maze_1000_1000.txt";
+    Map *map1 = new Map(test_file_name);
     start = clock();
     int length1 = find_path_sequential(map1);
     stop = clock();
-    return 0;
 
     // bidirectional
-    Map *map2 = new Map(mat2);
+    Map *map2 = new Map(test_file_name);
     start2 = clock();
     int length2 = find_path_bidirectional(map2);
     stop2 = clock();
