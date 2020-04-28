@@ -6,7 +6,7 @@
 #include "map.h"
 #include "sequential.h"
 
-void find_path_sequential(Map* map) {
+int find_path_sequential(Map* map) {
     std::priority_queue<Node *> open_list;
 
     std::unordered_set<int> open_id_list;
@@ -28,7 +28,7 @@ void find_path_sequential(Map* map) {
                 std::cout << reverse_path->path_parent->x << " " << reverse_path->path_parent->y << std::endl;
                 reverse_path = reverse_path->path_parent;
             }
-            return;
+            return current_node->g_value;
         }
 
         for (auto edge : current_node->adjacent_list)
