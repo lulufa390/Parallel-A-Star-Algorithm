@@ -49,17 +49,14 @@ int main() {
     // sequential
     // Map *map1 = new Map(mat2);
     std::string test_file_name = "maze_case/maze_1000_1000.txt";
-    Map *map1 = new Map(test_file_name);
+    Map *map = new Map(test_file_name);
     start = clock();
-    int length1 = find_path_sequential(map1);
+    int length1 = find_path_sequential(map);
     stop = clock();
 
-    delete map1;
-
     // bidirectional
-    Map *map2 = new Map(test_file_name);
     start2 = clock();
-    int length2 = find_path_bidirectional(map2);
+    int length2 = find_path_bidirectional(map);
     stop2 = clock();
 
 

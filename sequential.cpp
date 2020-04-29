@@ -6,7 +6,7 @@
 #include "map.h"
 #include "sequential.h"
 
-int find_path_sequential(Map* map) {
+int find_path_sequential(const Map* map) {
     std::priority_queue<std::pair<int, Node *>> open_list;
 
     int goal_id = map->goal->node_id;

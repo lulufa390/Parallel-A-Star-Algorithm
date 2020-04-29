@@ -19,8 +19,8 @@ public:
     int node_id;
 
     // for bidirectional
-    int g2_value[2];
-    int f2_value[2];
+    // int g2_value[2];
+    // int f2_value[2];
 
     std::vector<std::pair<Node *, int>> adjacent_list;
 
