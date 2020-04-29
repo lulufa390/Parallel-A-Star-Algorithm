@@ -7,42 +7,6 @@
 
 int main() {
 
-    // Map *map = new Map("maze_3_3.txt");
-    // find_path_sequential(map);
-    // return 0;
-
-    std::vector<std::vector<int> > mat = {
-            {0, 1, 2, 0, 0, 0, 0, 2, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 2, 0, 0},
-            {0, 0, 2, 0, 0, 0, 0, 2, 0, 0},
-            {0, 0, 2, 0, 0, 0, 0, 2, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 2, 0, 0, 0, 0, 0, 2, 0, 0},
-            {0, 2, 0, 0, 0, 0, 0, 2, 0, 3},
-            {0, 2, 0, 0, 0, 0, 0, 2, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 2, 0, 0},
-    };
-    
-
-    std::vector<std::vector<int>> mat2;
-
-    int size = 1000;
-
-    for (int i = 0; i < size; i++) {
-        if (i % 2 && i < size - 1) {
-            std::vector<int> line(size, 2);
-            line[rand() % size] = 0;
-            mat2.push_back(line);
-        }
-        else {
-            mat2.push_back(std::vector<int>(size, 0));
-        }
-    }
-
-    mat2[0][size/2] = 1;
-
-    mat2[size - 1][size/2] = 3;
-
     clock_t start, stop;
     clock_t start2, stop2;
 

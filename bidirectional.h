@@ -9,4 +9,6 @@
 
 int find_path_bidirectional(const Map* map);
 
+int find_path_bidirectional_custom(const Map* map);
+
 #endif //FINAL_BIDIRECTIONAL_H
