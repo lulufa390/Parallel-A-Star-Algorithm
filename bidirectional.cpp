@@ -126,7 +126,7 @@ static void *bidirection_thread(void *vargp)
     return NULL;
 }
 
-int find_path_bidirectional(const Map *map)
+int find_path_bidirectional(const Map *map, int thread_count)
 {
 
     pthread_t tid1, tid2;
@@ -266,7 +266,7 @@ static void *bidirection_custom_thread(void *vargp)
     }
 }
 
-int find_path_bidirectional_custom(const Map *map)
+int find_path_bidirectional_custom(const Map *map, int thread_count)
 {
 
     pthread_t tid1, tid2;

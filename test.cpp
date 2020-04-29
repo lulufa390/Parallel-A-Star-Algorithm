@@ -4,21 +4,31 @@
 #include "map.h"
 #include "sequential.h"
 #include "bidirectional.h"
+#include "centralized.h"
 
 #include <string>
 
 typedef struct test_t
 {
     clock_t start, stop;
-    int (*func)(const Map *map);
+    int (*func)(const Map *map, int thread_count);
     std::string test_name;
 
     int shortest;
 
-    test_t(int (*func)(const Map *map), std::string test_name)
+    int thread_count;
+
+    test_t(int (*func)(const Map *map, int thread_count), std::string test_name, int thread_count)
     {
         this->func = func;
         this->test_name = test_name;
+        this->thread_count = thread_count;
+    }
+
+    void execute(const Map* map) {
+        start = clock();
+        shortest = func(map, thread_count);
+        stop = clock();
     }
 
     void show_result()
@@ -31,20 +41,21 @@ typedef struct test_t
 int main()
 {
 
-    std::string test_file_name = "maze_case/maze_1000_1000.txt";
+    std::cout << "Init" << std::endl;
+    std::string test_file_name = "maze_case/maze_2000_2000.txt";
     Map *map = new Map(test_file_name);
+    std::cout << "Init done" << std::endl;
 
-    test_t tests[] = {
-        {&find_path_sequential, "Sequential"},
-        {&find_path_bidirectional, "Bidirection"},
-        {&find_path_bidirectional_custom, "Custom bidirection"}};
+    std::vector<test_t> tests({
+        {&find_path_sequential, "Sequential", 0},
+        // {&find_path_bidirectional, "Bidirection", 2},
+        // {&find_path_bidirectional_custom, "Custom bidirection", 2}
+        {&find_path_spa, "SPA", 2}
+        });
 
-    int test_count = 3;
-    for (int i = 0; i < test_count; i++)
+    for (int i = 0; i < tests.size(); i++)
     {
-        tests[i].start = clock();
-        tests[i].shortest = tests[i].func(map);
-        tests[i].stop = clock();
+        tests[i].execute(map);
         tests[i].show_result();
     }
 

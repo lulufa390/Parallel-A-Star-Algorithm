@@ -7,8 +7,8 @@
 
 #include "map.h"
 
-int find_path_bidirectional(const Map* map);
+int find_path_bidirectional(const Map* map, int);
 
-int find_path_bidirectional_custom(const Map* map);
+int find_path_bidirectional_custom(const Map* map, int);
 
 #endif //FINAL_BIDIRECTIONAL_H
