@@ -18,20 +18,13 @@ class Node
 public:
     int node_id;
 
-    // int f_value;
-
-    // int g_value;
-
     // for bidirectional
     int g2_value[2];
     int f2_value[2];
 
     std::vector<std::pair<Node *, int>> adjacent_list;
 
-    Node *path_parent;
-
-    // bool is_goal;
-    // bool is_start;
+    // Node *path_parent;
 
     // extra information
 public:
@@ -42,18 +35,9 @@ public:
     Node(int id)
     {
         node_id = id;
-        // f_value = 0;
-        // g_value = 0;
-        path_parent = nullptr;
-        // is_goal = false;
-        // is_start = false;
+        // path_parent = nullptr;
         x = y = -1;
     }
-
-    // bool operator<(const Node &n)
-    // {
-    //     return f_value > n.f_value;
-    // }
 
     int compute_heuristic(Node *node)
     {
@@ -67,7 +51,7 @@ public:
     Node *start;
     Node *goal;
 
-    std::unordered_set<Node *> node_set;
+    std::vector<Node *> node_set;
 
     int width, height;
 
@@ -79,6 +63,8 @@ public:
         // int height, width;
         input >> width >> height;
 
+        node_set = std::vector<Node*>(width*height);
+
         int startX, startY, destX, destY;
         input >> startX >> startY >> destX >> destY;
 
@@ -89,7 +75,7 @@ public:
             for (int j = 0; j < width; j++)
             {
                 Node *node = new Node(width * i + j);
-                node_set.insert(node);
+                node_set[node->node_id] = node;
                 node_matrix[i][j] = node;
 
                 node->x = i;
@@ -142,16 +128,16 @@ public:
 
     }
 
-    Map(const Map &map)
-    {
-        start = map.start;
-        goal = map.goal;
+    // Map(const Map &map)
+    // {
+    //     start = map.start;
+    //     goal = map.goal;
 
-        for (Node *node : map.node_set)
-        {
-            node_set.insert(node);
-        }
-    }
+    //     for (Node *node : map.node_set)
+    //     {
+    //         node_set.insert(node);
+    //     }
+    // }
 
     // void reverse()
     // {
