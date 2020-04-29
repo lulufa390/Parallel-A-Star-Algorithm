@@ -3,13 +3,14 @@
 //
 
 #include <pthread.h>
+#include <cmath>
 
 #include "map.h"
 #include "bidirectional.h"
 
 const int max_weight = 4096 * 4096;
 
-struct myThreadFunArgs
+struct bidirectionThreadArgs
 {
     int id;
     const Map *map;
@@ -25,9 +26,9 @@ struct myThreadFunArgs
     pthread_mutex_t *lock;
 };
 
-static void *myThreadFun(void *vargp)
+static void *bidirection_thread(void *vargp)
 {
-    struct myThreadFunArgs *args = (struct myThreadFunArgs *)vargp;
+    struct bidirectionThreadArgs *args = (struct bidirectionThreadArgs *)vargp;
 
     const Map *map = args->map;
 
@@ -160,7 +161,7 @@ int find_path_bidirectional(const Map *map)
     f[0] = f2_value[0][map->start->node_id] = map->goal->compute_heuristic(map->start);
     f[1] = f2_value[1][map->goal->node_id] = map->start->compute_heuristic(map->goal);
 
-    struct myThreadFunArgs args[2];
+    struct bidirectionThreadArgs args[2];
 
     pthread_mutex_t lock;
 
@@ -176,19 +177,131 @@ int find_path_bidirectional(const Map *map)
         args[i].lock = &lock;
     }
 
-    // args[1].id = 1;
-    // args[1].map = map;
-    // args[1].f2_value = f2_value;
-    // args[1].g2_value = g2_value;
-    // args[1].f = f;
-
     pthread_mutex_init(&lock, NULL);
 
-    pthread_create(&tid1, NULL, myThreadFun, (void *)&args[0]);
-    pthread_create(&tid2, NULL, myThreadFun, (void *)&args[1]);
+    pthread_create(&tid1, NULL, bidirection_thread, (void *)&args[0]);
+    pthread_create(&tid2, NULL, bidirection_thread, (void *)&args[1]);
 
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
 
     return current_shortest;
+}
+
+struct bidirectionCustomThreadArgs
+{
+    int id;
+    const Map *map;
+    std::vector<int> *g_value;
+
+    int meet_id;
+};
+
+static void *bidirection_custom_thread(void *vargp)
+{
+    struct bidirectionCustomThreadArgs *args = (struct bidirectionCustomThreadArgs *)vargp;
+
+    const Map *map = args->map;
+
+    int id = args->id;
+
+    int index = args->id;
+    int other = 1 - args->id;
+
+    Node *start, *goal;
+    if (args->id == 0)
+    {
+        start = map->start;
+        goal = map->goal;
+    }
+    else
+    {
+        start = map->goal;
+        goal = map->start;
+    }
+
+    std::vector<int> *g_value = args->g_value;
+
+    std::priority_queue<std::pair<int, Node *>> open_list;
+
+    int goal_id = goal->node_id;
+
+    open_list.push({goal->compute_heuristic(start), start});
+
+    // std::vector<int> g_value(map->height * map->width, INT32_MAX);
+    std::vector<int> path_parent(map->height * map->width, -1);
+
+    g_value[index][start->node_id] = 0;
+
+    int count = 0;
+
+    while (!open_list.empty())
+    {
+        count++;
+        Node *current_node = open_list.top().second;
+        open_list.pop();
+
+        if (g_value[other][current_node->node_id] < INT32_MAX)
+        {
+            args->meet_id = current_node->node_id;
+            std::cout << count << std::endl;
+            return NULL;
+        }
+
+        for (auto edge : current_node->adjacent_list)
+        {
+            Node *node = edge.first;
+            int weight = edge.second;
+
+            int update_g_value = weight + g_value[index][current_node->node_id];
+
+            if (update_g_value < g_value[index][node->node_id])
+            {
+                g_value[index][node->node_id] = update_g_value;
+                int new_f = update_g_value + map->goal->compute_heuristic(node);
+                path_parent[node->node_id] = current_node->node_id;
+                open_list.push({new_f, node});
+            }
+        }
+    }
+}
+
+int find_path_bidirectional_custom(const Map *map)
+{
+
+    pthread_t tid1, tid2;
+
+    struct bidirectionCustomThreadArgs args[2];
+    std::vector<int> g_value[2];
+
+    for (int i = 0; i < 2; i++)
+    {
+        g_value[i] = std::vector<int>(map->width * map->height, INT32_MAX);
+        args[i].id = i;
+        args[i].map = map;
+        args[i].g_value = g_value;
+        args[i].meet_id = -1;
+    }
+
+    pthread_create(&tid1, NULL, bidirection_custom_thread, (void *)&args[0]);
+    pthread_create(&tid2, NULL, bidirection_custom_thread, (void *)&args[1]);
+
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
+
+    int shortest = INT32_MAX;
+    for (int i = 0; i < 2; i++)
+    {
+        if (args[i].meet_id >= 0)
+        {
+            int id = args[i].meet_id;
+            int new_len = g_value[0][id] + g_value[1][id];
+            if (new_len < shortest)
+            {
+                shortest = new_len;
+            }
+        }
+    }
+
+    return shortest;
 }

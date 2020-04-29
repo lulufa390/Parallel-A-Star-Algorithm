@@ -5,27 +5,47 @@
 #include "sequential.h"
 #include "bidirectional.h"
 
-int main() {
+#include <string>
 
+typedef struct test_t
+{
     clock_t start, stop;
-    clock_t start2, stop2;
+    int (*func)(const Map *map);
+    std::string test_name;
 
-    // sequential
-    // Map *map1 = new Map(mat2);
+    int shortest;
+
+    test_t(int (*func)(const Map *map), std::string test_name)
+    {
+        this->func = func;
+        this->test_name = test_name;
+    }
+
+    void show_result()
+    {
+        std::cout << test_name << " Total Time : " << (double)(stop - start) / CLOCKS_PER_SEC << "s" << std::endl;
+        std::cout << test_name <<" shortest path length : " << shortest << std::endl;
+    }
+} test_t;
+
+int main()
+{
+
     std::string test_file_name = "maze_case/maze_1000_1000.txt";
     Map *map = new Map(test_file_name);
-    start = clock();
-    int length1 = find_path_sequential(map);
-    stop = clock();
 
-    // bidirectional
-    start2 = clock();
-    int length2 = find_path_bidirectional(map);
-    stop2 = clock();
+    test_t tests[] = {
+        {&find_path_sequential, "Sequential"},
+        {&find_path_bidirectional, "Bidirection"},
+        {&find_path_bidirectional_custom, "Custom bidirection"}};
 
+    int test_count = 3;
+    for (int i = 0; i < test_count; i++)
+    {
+        tests[i].start = clock();
+        tests[i].shortest = tests[i].func(map);
+        tests[i].stop = clock();
+        tests[i].show_result();
+    }
 
-    std::cout << "Sequential Total Time : " <<(double)(stop - start) / CLOCKS_PER_SEC << "s" << std::endl;
-    std::cout << "Sequential shortest path length : " << length1 << std::endl;
-    std::cout << "Bidirectional Total Time : " <<(double)(stop2 - start2) / CLOCKS_PER_SEC << "s" << std::endl;
-    std::cout << "Bidirectional shortest path length : " << length2 << std::endl;
 }
