@@ -26,7 +26,7 @@ int main() {
 
     std::vector<std::vector<int>> mat2;
 
-    int size = 300;
+    int size = 1000;
 
     for (int i = 0; i < size; i++) {
         if (i % 2 && i < size - 1) {
