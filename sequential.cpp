@@ -12,6 +12,8 @@ int find_path_sequential(Map* map) {
     std::unordered_set<int> open_id_list;
     std::unordered_set<int> close_id_list;
 
+    int goal_id = map->goal->node_id;
+
     open_list.push(map->start);
     open_id_list.insert(map->start->node_id);
 
@@ -21,11 +23,11 @@ int find_path_sequential(Map* map) {
         open_id_list.erase(current_node->node_id);
         close_id_list.insert(current_node->node_id);
 
-        if (current_node->is_goal) {
+        if (current_node->node_id == goal_id) {
             // print path
             Node *reverse_path = current_node;
             while (reverse_path->path_parent) {
-                std::cout << reverse_path->path_parent->x << " " << reverse_path->path_parent->y << std::endl;
+                // std::cout << reverse_path->path_parent->x << " " << reverse_path->path_parent->y << std::endl;
                 reverse_path = reverse_path->path_parent;
             }
             return current_node->g_value;
@@ -65,7 +67,7 @@ int find_path_sequential(Map* map) {
             }
 
             node->g_value = update_g_value;
-            node->f_value = update_g_value + map->compute_heuristic(node);
+            node->f_value = update_g_value + map->goal->compute_heuristic(node);
 
             node->path_parent = current_node;
         }

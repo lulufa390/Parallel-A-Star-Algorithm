@@ -54,6 +54,8 @@ int main() {
     int length1 = find_path_sequential(map1);
     stop = clock();
 
+    delete map1;
+
     // bidirectional
     Map *map2 = new Map(test_file_name);
     start2 = clock();
