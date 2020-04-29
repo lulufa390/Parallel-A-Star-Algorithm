@@ -7,18 +7,27 @@
 #include "sequential.h"
 
 int find_path_sequential(Map* map) {
-    std::priority_queue<Node *> open_list;
+    std::priority_queue<std::pair<int, Node *>> open_list;
 
     std::unordered_set<int> open_id_list;
     std::unordered_set<int> close_id_list;
 
     int goal_id = map->goal->node_id;
 
-    open_list.push(map->start);
+    open_list.push({map->goal->compute_heuristic(map->start) ,map->start});
     open_id_list.insert(map->start->node_id);
 
+    std::vector<int> f_value(map->height*map->width, INT32_MAX);
+    std::vector<int> g_value(map->height*map->width, INT32_MAX);
+
+    g_value[map->start->node_id] = 0;
+    f_value[map->start->node_id] = map->goal->compute_heuristic(map->start);
+
+    int count = 0;
+
     while (!open_list.empty()) {
-        Node *current_node = open_list.top();
+        count ++;
+        Node *current_node = open_list.top().second;
         open_list.pop();
         open_id_list.erase(current_node->node_id);
         close_id_list.insert(current_node->node_id);
@@ -30,7 +39,8 @@ int find_path_sequential(Map* map) {
                 // std::cout << reverse_path->path_parent->x << " " << reverse_path->path_parent->y << std::endl;
                 reverse_path = reverse_path->path_parent;
             }
-            return current_node->g_value;
+            std::cout << count << std::endl;
+            return g_value[current_node->node_id];
         }
 
         for (auto edge : current_node->adjacent_list)
@@ -38,14 +48,14 @@ int find_path_sequential(Map* map) {
             Node *node = edge.first;
             int weight = edge.second;
 
-            int update_g_value = weight + current_node->g_value;
+            int update_g_value = weight + g_value[current_node->node_id];
 
             if (close_id_list.find(node->node_id) != close_id_list.end())
             {
-                if (update_g_value < node->g_value)
+                if (update_g_value < g_value[node->node_id])
                 {
                     close_id_list.erase(node->node_id);
-                    open_list.push(node);
+                    open_list.push({g_value[node->node_id], node});
                     open_id_list.insert(node->node_id);
                 }
                 else
@@ -57,21 +67,23 @@ int find_path_sequential(Map* map) {
             {
                 if (open_id_list.find(node->node_id) == open_id_list.end())
                 {
-                    open_list.push(node);
+                    open_list.push({g_value[node->node_id], node});
                     open_id_list.insert(node->node_id);
                 }
-                else if (update_g_value > node->g_value)
+                else if (update_g_value > g_value[node->node_id])
                 {
                     continue;
                 }
             }
 
-            node->g_value = update_g_value;
-            node->f_value = update_g_value + map->goal->compute_heuristic(node);
+            g_value[node->node_id] = update_g_value;
+            f_value[node->node_id] = update_g_value + map->goal->compute_heuristic(node);
 
             node->path_parent = current_node;
         }
     }
+
+    
 }
 
 

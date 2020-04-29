@@ -18,9 +18,9 @@ class Node
 public:
     int node_id;
 
-    int f_value;
+    // int f_value;
 
-    int g_value;
+    // int g_value;
 
     // for bidirectional
     int g2_value[2];
@@ -42,18 +42,18 @@ public:
     Node(int id)
     {
         node_id = id;
-        f_value = 0;
-        g_value = 0;
+        // f_value = 0;
+        // g_value = 0;
         path_parent = nullptr;
         // is_goal = false;
         // is_start = false;
         x = y = -1;
     }
 
-    bool operator<(const Node &n)
-    {
-        return f_value > n.f_value;
-    }
+    // bool operator<(const Node &n)
+    // {
+    //     return f_value > n.f_value;
+    // }
 
     int compute_heuristic(Node *node)
     {
@@ -69,95 +69,14 @@ public:
 
     std::unordered_set<Node *> node_set;
 
-    // bool is_reverse;
+    int width, height;
 
 public:
-    // initialize from a 2-dimension map
-    // Map(std::vector<std::vector<int>> matrix)
-    // {
-
-    //     if (matrix.empty())
-    //     {
-    //         return;
-    //     }
-
-    //     int height = matrix.size();
-    //     int width = matrix[0].size();
-
-    //     std::vector<std::vector<Node *>> node_matrix(height, std::vector<Node *>(width, nullptr));
-
-    //     // new nodes
-    //     for (int i = 0; i < height; i++)
-    //     {
-    //         for (int j = 0; j < width; j++)
-    //         {
-    //             Node *node = new Node(width * i + j);
-    //             node_set.insert(node);
-    //             node_matrix[i][j] = node;
-
-    //             node->x = i;
-    //             node->y = j;
-
-    //             if (matrix[i][j] == 1)
-    //             {
-    //                 // node->is_start = true;
-    //                 start = node;
-    //             }
-    //             else if (matrix[i][j] == 3)
-    //             {
-    //                 node->is_goal = true;
-    //                 goal = node;
-    //             }
-    //         }
-    //     }
-
-    //     // calculate adjacent list
-    //     for (int i = 0; i < height; i++)
-    //     {
-    //         for (int j = 0; j < width; j++)
-    //         {
-
-    //             if (i > 0)
-    //             {
-    //                 if (matrix[i][j] != 2 && matrix[i - 1][j] != 2)
-    //                 {
-    //                     node_matrix[i][j]->adjacent_list.push_back({node_matrix[i - 1][j], 1});
-    //                 }
-    //             }
-
-    //             if (i < height - 1)
-    //             {
-    //                 if (matrix[i][j] != 2 && matrix[i + 1][j] != 2)
-    //                 {
-    //                     node_matrix[i][j]->adjacent_list.push_back({node_matrix[i + 1][j], 1});
-    //                 }
-    //             }
-
-    //             if (j > 0)
-    //             {
-    //                 if (matrix[i][j] != 2 && matrix[i][j - 1] != 2)
-    //                 {
-    //                     node_matrix[i][j]->adjacent_list.push_back({node_matrix[i][j - 1], 1});
-    //                 }
-    //             }
-
-    //             if (j < width - 1)
-    //             {
-    //                 if (matrix[i][j] != 2 && matrix[i][j + 1] != 2)
-    //                 {
-    //                     node_matrix[i][j]->adjacent_list.push_back({node_matrix[i][j + 1], 1});
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     is_reverse = false;
-    // }
 
     Map(std::string fileName)
     {
         std::ifstream input(fileName, std::ifstream::in);
-        int height, width;
+        // int height, width;
         input >> width >> height;
 
         int startX, startY, destX, destY;
