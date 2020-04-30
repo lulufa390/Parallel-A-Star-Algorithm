@@ -2,6 +2,8 @@
 
 #include <pthread.h>
 
+using namespace std;
+
 struct spaThreadArgs
 {
     int id;
@@ -10,10 +12,10 @@ struct spaThreadArgs
     bool *finished;
     long *shortest;
 
-    std::vector<int> *g_value;
+    vector<int> *g_value;
 
     pthread_mutex_t *lock;
-    std::priority_queue<std::pair<int, Node *>> *open_list;
+    priority_queue<pair<int, Node *>> *open_list;
     int *remain_count;
 
 
@@ -30,10 +32,10 @@ static void *spa_thread(void *vargp)
     long &shortest = *(args->shortest);
     bool &finished = *(args->finished);
 
-    std::vector<int> &g_value = *(args->g_value);
+    vector<int> &g_value = *(args->g_value);
 
     pthread_mutex_t &lock = *(args->lock);
-    std::priority_queue<std::pair<int, Node *>> &open_list = *(args->open_list);
+    priority_queue<pair<int, Node *>> &open_list = *(args->open_list);
     int &remain_count = *(args->remain_count);
     
 
@@ -54,18 +56,18 @@ static void *spa_thread(void *vargp)
         open_list.pop();
         pthread_mutex_unlock(&lock);
 
-        // std::cout << "thread " << thread_id << "running: " << count << std::endl;
+        // cout << "thread " << thread_id << "running: " << count << endl;
         
 
         if (current_node->node_id == goal_id) {
-            std::cout << count << std::endl;
+            cout << count << endl;
             
             shortest = g_value[current_node->node_id];
             finished = true;
             return NULL;
         }
 
-        std::vector<std::pair<int, Node*>> expand_buffer;
+        vector<pair<int, Node*>> expand_buffer;
         for (auto edge : current_node->adjacent_list)
         {
             Node *node = edge.first;
@@ -87,7 +89,7 @@ static void *spa_thread(void *vargp)
         pthread_mutex_unlock(&lock);
     }
 
-    std::cout << count << std::endl;
+    cout << count << endl;
 
     return NULL;
 }
@@ -99,10 +101,10 @@ int find_path_spa(const Map *map, int thread_count)
     // shared variables
     long shortest = INT32_MAX;
     bool finished = false;;
-    std::vector<int> g_value = std::vector<int>(map->height * map->height, INT32_MAX);
+    vector<int> g_value = vector<int>(map->height * map->height, INT32_MAX);
     pthread_mutex_t lock;
     pthread_mutex_init(&lock, NULL);
-    std::priority_queue<std::pair<int, Node *>> open_list;
+    priority_queue<pair<int, Node *>> open_list;
     int remain_count;
 
     struct spaThreadArgs args[thread_count];

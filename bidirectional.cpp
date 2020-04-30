@@ -8,20 +8,22 @@
 #include "map.h"
 #include "bidirectional.h"
 
+using namespace std;
+
 const int max_weight = 4096 * 4096;
 
 struct bidirectionThreadArgs
 {
     int id;
     const Map *map;
-    std::vector<int> *g2_value;
-    std::vector<int> *f2_value;
+    vector<int> *g2_value;
+    vector<int> *f2_value;
     int *f;
 
     // shared global variable
     long *current_shortest;
-    //std::priority_queue<Node *> middle_list;
-    std::unordered_set<int> *middle_list_id;
+    //priority_queue<Node *> middle_list;
+    unordered_set<int> *middle_list_id;
 
     pthread_mutex_t *lock;
 };
@@ -32,10 +34,10 @@ static void *bidirection_thread(void *vargp)
 
     const Map *map = args->map;
 
-    std::vector<int> *g2_value = args->g2_value;
-    std::vector<int> *f2_value = args->f2_value;
+    vector<int> *g2_value = args->g2_value;
+    vector<int> *f2_value = args->f2_value;
 
-    std::unordered_set<int> &middle_list_id = *(args->middle_list_id);
+    unordered_set<int> &middle_list_id = *(args->middle_list_id);
     long &current_shortest = *(args->current_shortest);
 
     pthread_mutex_t &lock = *(args->lock);
@@ -59,7 +61,7 @@ static void *bidirection_thread(void *vargp)
         goal = map->start;
     }
 
-    std::priority_queue<std::pair<int, Node *>> open_list;
+    priority_queue<pair<int, Node *>> open_list;
     // g2_value[index][start->node_id] = 0;
     // f2_value[index][start->node_id] = goal->compute_heuristic(start);
     open_list.push({f2_value[index][start->node_id], start});
@@ -98,7 +100,7 @@ static void *bidirection_thread(void *vargp)
                             if (g2_value[0][node->node_id] + g2_value[1][node->node_id] < current_shortest)
                             {
                                 current_shortest = g2_value[0][node->node_id] + g2_value[1][node->node_id];
-                                std::cout << current_shortest << std::endl;
+                                cout << current_shortest << endl;
                             }
 
                             pthread_mutex_unlock(&lock);
@@ -121,7 +123,7 @@ static void *bidirection_thread(void *vargp)
         }
     }
 
-    std::cout << "thread " << index << " stops " << count << std::endl;
+    cout << "thread " << index << " stops " << count << endl;
 
     return NULL;
 }
@@ -131,21 +133,21 @@ int find_path_bidirectional(const Map *map, int thread_count)
 
     pthread_t tid1, tid2;
 
-    std::vector<int> g2_value[2];
-    std::vector<int> f2_value[2];
+    vector<int> g2_value[2];
+    vector<int> f2_value[2];
 
     int f[2];
 
     long current_shortest;
-    std::unordered_set<int> middle_list_id;
+    unordered_set<int> middle_list_id;
 
-    g2_value[0] = std::vector<int>(map->height * map->height, max_weight);
-    g2_value[1] = std::vector<int>(map->height * map->height, max_weight);
+    g2_value[0] = vector<int>(map->height * map->height, max_weight);
+    g2_value[1] = vector<int>(map->height * map->height, max_weight);
 
-    f2_value[0] = std::vector<int>(map->height * map->height, max_weight);
-    f2_value[1] = std::vector<int>(map->height * map->height, max_weight);
+    f2_value[0] = vector<int>(map->height * map->height, max_weight);
+    f2_value[1] = vector<int>(map->height * map->height, max_weight);
 
-    std::cout << g2_value[0].size() << std::endl;
+    cout << g2_value[0].size() << endl;
 
     current_shortest = max_weight;
 
@@ -192,7 +194,7 @@ struct bidirectionCustomThreadArgs
 {
     int id;
     const Map *map;
-    std::vector<int> *g_value;
+    vector<int> *g_value;
 
     int meet_id;
 };
@@ -220,16 +222,16 @@ static void *bidirection_custom_thread(void *vargp)
         goal = map->start;
     }
 
-    std::vector<int> *g_value = args->g_value;
+    vector<int> *g_value = args->g_value;
 
-    std::priority_queue<std::pair<int, Node *>> open_list;
+    priority_queue<pair<int, Node *>> open_list;
 
     int goal_id = goal->node_id;
 
     open_list.push({goal->compute_heuristic(start), start});
 
-    // std::vector<int> g_value(map->height * map->width, INT32_MAX);
-    std::vector<int> path_parent(map->height * map->width, -1);
+    // vector<int> g_value(map->height * map->width, INT32_MAX);
+    vector<int> path_parent(map->height * map->width, -1);
 
     g_value[index][start->node_id] = 0;
 
@@ -244,7 +246,7 @@ static void *bidirection_custom_thread(void *vargp)
         if (g_value[other][current_node->node_id] < INT32_MAX)
         {
             args->meet_id = current_node->node_id;
-            std::cout << count << std::endl;
+            cout << count << endl;
             return NULL;
         }
 
@@ -272,11 +274,11 @@ int find_path_bidirectional_custom(const Map *map, int thread_count)
     pthread_t tid1, tid2;
 
     struct bidirectionCustomThreadArgs args[2];
-    std::vector<int> g_value[2];
+    vector<int> g_value[2];
 
     for (int i = 0; i < 2; i++)
     {
-        g_value[i] = std::vector<int>(map->width * map->height, INT32_MAX);
+        g_value[i] = vector<int>(map->width * map->height, INT32_MAX);
         args[i].id = i;
         args[i].map = map;
         args[i].g_value = g_value;

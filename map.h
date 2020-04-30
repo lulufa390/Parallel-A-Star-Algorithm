@@ -13,6 +13,8 @@
 #include <utility>
 #include <fstream>
 
+using namespace std;
+
 class Node
 {
 public:
@@ -22,7 +24,7 @@ public:
     // int g2_value[2];
     // int f2_value[2];
 
-    std::vector<std::pair<Node *, int>> adjacent_list;
+    vector<pair<Node *, int>> adjacent_list;
 
     // Node *path_parent;
 
@@ -51,24 +53,24 @@ public:
     Node *start;
     Node *goal;
 
-    std::vector<Node *> node_set;
+    vector<Node *> node_set;
 
     int width, height;
 
 public:
 
-    Map(std::string fileName)
+    Map(string fileName)
     {
-        std::ifstream input(fileName, std::ifstream::in);
+        ifstream input(fileName, ifstream::in);
         // int height, width;
         input >> width >> height;
 
-        node_set = std::vector<Node*>(width*height);
+        node_set = vector<Node*>(width*height);
 
         int startX, startY, destX, destY;
         input >> startX >> startY >> destX >> destY;
 
-        std::vector<std::vector<Node *>> node_matrix(height, std::vector<Node *>(width, nullptr));
+        vector<vector<Node *>> node_matrix(height, vector<Node *>(width, nullptr));
 
         for (int i = 0; i < height; i++)
         {
@@ -115,7 +117,7 @@ public:
                         newY = y;
                         break;
                     default:
-                        throw std::string("unknow direction");
+                        throw string("unknow direction");
                     }
                     node_matrix[y][x]->adjacent_list.push_back({node_matrix[newY][newX], 1});
                 }

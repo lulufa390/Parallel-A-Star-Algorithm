@@ -8,17 +8,19 @@
 
 #include <string>
 
+using namespace std;
+
 typedef struct test_t
 {
     clock_t start, stop;
     int (*func)(const Map *map, int thread_count);
-    std::string test_name;
+    string test_name;
 
     int shortest;
 
     int thread_count;
 
-    test_t(int (*func)(const Map *map, int thread_count), std::string test_name, int thread_count)
+    test_t(int (*func)(const Map *map, int thread_count), string test_name, int thread_count)
     {
         this->func = func;
         this->test_name = test_name;
@@ -33,20 +35,20 @@ typedef struct test_t
 
     void show_result()
     {
-        std::cout << test_name << " Total Time : " << (double)(stop - start) / CLOCKS_PER_SEC << "s" << std::endl;
-        std::cout << test_name <<" shortest path length : " << shortest << std::endl;
+        cout << test_name << " Total Time : " << (double)(stop - start) / CLOCKS_PER_SEC << "s" << endl;
+        cout << test_name <<" shortest path length : " << shortest << endl;
     }
 } test_t;
 
 int main()
 {
 
-    std::cout << "Init" << std::endl;
-    std::string test_file_name = "maze_case/maze_2000_2000.txt";
+    cout << "Init" << endl;
+    string test_file_name = "maze_case/maze_2000_2000.txt";
     Map *map = new Map(test_file_name);
-    std::cout << "Init done" << std::endl;
+    cout << "Init done" << endl;
 
-    std::vector<test_t> tests({
+    vector<test_t> tests({
         {&find_path_sequential, "Sequential", 0},
         // {&find_path_bidirectional, "Bidirection", 2},
         // {&find_path_bidirectional_custom, "Custom bidirection", 2}

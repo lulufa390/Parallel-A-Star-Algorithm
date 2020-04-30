@@ -6,14 +6,16 @@
 #include "map.h"
 #include "sequential.h"
 
+using namespace std;
+
 int find_path_sequential(const Map* map, int thread_count) {
-    std::priority_queue<std::pair<int, Node *>> open_list;
+    priority_queue<pair<int, Node *>> open_list;
 
     int goal_id = map->goal->node_id;
     open_list.push({map->goal->compute_heuristic(map->start) ,map->start});
 
-    std::vector<int> g_value(map->height*map->width, INT32_MAX);
-    // std::vector<int> path_parent(map->height*map->width, -1);
+    vector<int> g_value(map->height*map->width, INT32_MAX);
+    // vector<int> path_parent(map->height*map->width, -1);
 
     g_value[map->start->node_id] = 0;
 
@@ -25,7 +27,7 @@ int find_path_sequential(const Map* map, int thread_count) {
         open_list.pop();
 
         if (current_node->node_id == goal_id) {
-            std::cout << count << std::endl;
+            cout << count << endl;
             
             return g_value[current_node->node_id];
         }
