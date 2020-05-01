@@ -1,6 +1,9 @@
 #include "centralized.h"
 
 #include <pthread.h>
+#include <atomic>
+
+#include <tbb/concurrent_priority_queue.h>
 
 using namespace std;
 
@@ -15,8 +18,8 @@ struct spaThreadArgs
     vector<int> *g_value;
 
     pthread_mutex_t *lock;
-    priority_queue<pair<int, Node *>> *open_list;
-    int *remain_count;
+    tbb::concurrent_priority_queue<pair<int, Node *>> *open_list;
+    atomic_int *remain_count;
 
 
 };
@@ -34,27 +37,39 @@ static void *spa_thread(void *vargp)
 
     vector<int> &g_value = *(args->g_value);
 
-    pthread_mutex_t &lock = *(args->lock);
-    priority_queue<pair<int, Node *>> &open_list = *(args->open_list);
-    int &remain_count = *(args->remain_count);
+    // pthread_mutex_t &lock = *(args->lock);
+    tbb::concurrent_priority_queue<pair<int, Node *>> &open_list = *(args->open_list);
+    atomic_int &remain_count = *(args->remain_count);
     
 
     int count = 0;
 
     int goal_id = map->goal->node_id;
 
-    while (!finished&&(!open_list.empty() || remain_count > 0)) {
+    while (!finished) {
         count ++;
         
-        pthread_mutex_lock(&lock);
-        if (open_list.empty()) {
-            pthread_mutex_unlock(&lock);
+        // pthread_mutex_lock(&lock);
+        // if (open_list.empty()) {
+        //     pthread_mutex_unlock(&lock);
+        //     continue;
+        // }
+        // Node *current_node = open_list.top().second;
+        // open_list.pop();
+        // pthread_mutex_unlock(&lock);
 
+        remain_count > 0;
+        pair<int, Node*> item;
+        bool has_item = open_list.try_pop(item);
+        if (!has_item) {
+            if (remain_count == 0) {
+                return NULL;
+            }
             continue;
         }
-        Node *current_node = open_list.top().second;
-        open_list.pop();
-        pthread_mutex_unlock(&lock);
+
+        Node* current_node = item.second;
+
 
         // cout << "thread " << thread_id << "running: " << count << endl;
         
@@ -81,12 +96,12 @@ static void *spa_thread(void *vargp)
                 expand_buffer.push_back({new_f, node});
             }
         }
-        pthread_mutex_lock(&lock);
+        // pthread_mutex_lock(&lock);
         for (auto item : expand_buffer) {
             open_list.push(item);
         }
+        // pthread_mutex_unlock(&lock);
         remain_count += expand_buffer.size() - 1;
-        pthread_mutex_unlock(&lock);
     }
 
     cout << count << endl;
@@ -104,8 +119,8 @@ int find_path_spa(const Map *map, int thread_count)
     vector<int> g_value = vector<int>(map->height * map->height, INT32_MAX);
     pthread_mutex_t lock;
     pthread_mutex_init(&lock, NULL);
-    priority_queue<pair<int, Node *>> open_list;
-    int remain_count;
+    tbb::concurrent_priority_queue<pair<int, Node *>> open_list;
+    atomic_int remain_count;
 
     struct spaThreadArgs args[thread_count];
 
