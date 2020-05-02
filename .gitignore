@@ -1,3 +1,6 @@
 *.class
 a.out
 .vscode
+tbb
+*.o
+main
