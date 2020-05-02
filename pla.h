@@ -25,7 +25,7 @@ extern std::vector<int> start_g_value;
 extern std::queue<pair<int, Node *>> wait_list;
 
 
-int compute_pla(const Map* map, int thread_count);
+int find_path_pla(const Map* map, int thread_count);
 
 
 #endif //FINAL_PLA_H

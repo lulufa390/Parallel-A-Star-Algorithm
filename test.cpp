@@ -44,28 +44,16 @@ typedef struct test_t
 int main()
 {
 
-
     cout << "Init" << endl;
-    string test_file_name = "../maze_case/maze_2000_2000.txt";
-//    string file_name = "fuckingfile.txt";
-//
-//    ifstream input;
-//    input.open(file_name);
-//
-//    char output[100];
-//
-//    int fuck = 3;
-//
-//    input >> output;
-//
-//    cout << output;
+
+    string test_file_name = "maze_case/maze_2000_2000.txt";
 
     Map *map = new Map(test_file_name);
     cout << "Init done" << endl;
 
     vector<test_t> tests({
         {&find_path_sequential, "Sequential", 0},
-        {&compute_pla, "pla", 8},
+        {&find_path_pla, "pla", 8},
         // {&find_path_bidirectional, "Bidirection", 2},
         // {&find_path_bidirectional_custom, "Custom bidirection", 2}
 //        {&find_path_spa, "SPA", 2}
@@ -77,8 +65,5 @@ int main()
         tests[i].show_result();
     }
 
-
-
     return 0;
-
 }
