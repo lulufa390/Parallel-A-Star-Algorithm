@@ -46,7 +46,7 @@ int main()
 
 
     cout << "Init" << endl;
-    string test_file_name = "../maze_case/maze_100_100.txt";
+    string test_file_name = "../maze_case/maze_2000_2000.txt";
 //    string file_name = "fuckingfile.txt";
 //
 //    ifstream input;

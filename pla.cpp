@@ -4,12 +4,10 @@
 
 #include "pla.h"
 
-//int best_soln;
-
-int best_soln;
 int optimal_length;
 thread_state* thread_array;
-vector<int> start_g_value;
+std::vector<int> start_g_value;
+std::queue<pair<int, Node *>> wait_list;
 
 std::vector<pair<int, Node*> > start_expand(const Map* map, int node_number) {
 
@@ -24,6 +22,7 @@ std::vector<pair<int, Node*> > start_expand(const Map* map, int node_number) {
     std::vector<pair<int, Node*> > expand_list;
 
     while (!active_nodes.empty()) {
+
         Node *current_node = active_nodes.top().second;
         active_nodes.pop();
 
@@ -49,8 +48,6 @@ std::vector<pair<int, Node*> > start_expand(const Map* map, int node_number) {
                 }
             }
         }
-
-        std::cout << "active size " << active_nodes.size() << std::endl;
     }
 
     while (!active_nodes.empty()) {
@@ -132,16 +129,17 @@ int compute_pla(const Map* map, int thread_count) {
 
     omp_set_num_threads(thread_count);
 
-    best_soln = INT16_MAX;
+//    best_soln = INT32_MAX;
 
-    optimal_length = INT16_MAX;
+    optimal_length = INT32_MAX;
 
+
+    omp_lock_t lock;
+    omp_init_lock(&lock);
 
 #pragma omp parallel default(shared)
     {
 //        priority_queue<pair<int, Node *>> open_list;
-
-
 
 //        int goal_id = map->goal->node_id;
 //        open_list.push({map->goal->compute_heuristic(map->start) ,map->start});
@@ -154,23 +152,74 @@ int compute_pla(const Map* map, int thread_count) {
 //        g_value[map->start->node_id] = 0;
         int id = omp_get_thread_num();
 
-
-
-        std::cout << id << std::endl;
+//        std::cout << id << std::endl;
 
 //        int count = 0;
 
-        while (!thread_array[id].open_list.empty()) {
+
+        omp_set_lock(&lock);
+        while (!thread_array[id].open_list.empty() || wait_list.size() != 0) {
 //            count++;
-            Node *current_node = thread_array[id].open_list.top().second;
-            thread_array[id].open_list.pop();
+
+//            omp_unset_lock(&lock);
+
+//            Node* current_node = thread_array[id].open_list.top().second;
+//            thread_array[id].open_list.pop();
+
+            if (thread_array[id].open_list.size() > 5) {
+                wait_list.push(thread_array[id].open_list.top());
+                thread_array[id].open_list.pop();
+            }
+
+            Node* current_node = nullptr;
+
+            if (thread_array[id].open_list.size() == 0) {
+                if (wait_list.size() > 0) {
+                    auto fetch_element = wait_list.front();
+                    wait_list.pop();
+
+                    thread_array[id].open_list.push(fetch_element);
+
+                    int copy_g_value = fetch_element.first - map->goal->compute_heuristic(fetch_element.second);
+
+                    if (copy_g_value < g_value[fetch_element.second->node_id]) {
+                        g_value[fetch_element.second->node_id] = copy_g_value;
+                    }
+
+                }
+
+                current_node = thread_array[id].open_list.top().second;
+                thread_array[id].open_list.pop();
+
+            }
+            else {
+                current_node = thread_array[id].open_list.top().second;
+                thread_array[id].open_list.pop();
+            }
+
 
             if (current_node->node_id == map->goal->node_id) {
-                optimal_length = g_value[current_node->node_id];
+//                optimal_length = g_value[current_node->node_id];
+
+                if (g_value[current_node->node_id] < optimal_length) {
+                    optimal_length = g_value[current_node->node_id];
+                }
 //                cout << count << endl;
 
 //                return best_soln;
             }
+            omp_unset_lock(&lock);
+
+//            if (g_value[current_node->node_id] + map->goal->compute_heuristic(current_node) > best_soln) {
+//
+//                std::cout << "best: " << best_soln << std::endl;
+//
+//                std::cout << "g_value: " << g_value[current_node->node_id] << std::endl;
+//                std::cout << "h_value: " << map->goal->compute_heuristic(current_node) << std::endl;
+//
+//
+//                continue;
+//            }
 
             for (auto edge : current_node->adjacent_list)
             {
@@ -183,15 +232,18 @@ int compute_pla(const Map* map, int thread_count) {
                     g_value[node->node_id] = update_g_value;
                     int new_f = update_g_value + map->goal->compute_heuristic(node);
 
-                    if (new_f < best_soln) {
-                        best_soln = new_f;
-                    }
+//                    if (new_f < best_soln) {
+//                        best_soln = new_f;
+//                    }
 
                     // path_parent[node->node_id] = current_node->node_id;
                     thread_array[id].open_list.push({new_f, node});
                 }
             }
+            omp_set_lock(&lock);
         }
+
+        omp_unset_lock(&lock);
     }
 
     return optimal_length;

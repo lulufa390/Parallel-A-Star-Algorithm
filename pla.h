@@ -7,29 +7,25 @@
 
 #include <omp.h>
 #include <vector>
+#include <queue>
 #include "map.h"
 
 class thread_state {
 public:
     priority_queue<pair<int, Node *>> open_list;
-
-//    vector<int> g_value;
 };
 
 
-extern int best_soln;
 extern int optimal_length;
 
 extern thread_state* thread_array;
 
-extern vector<int> start_g_value;
+extern std::vector<int> start_g_value;
 
+extern std::queue<pair<int, Node *>> wait_list;
 
-
-//extern Map* map;
 
 int compute_pla(const Map* map, int thread_count);
-
 
 
 #endif //FINAL_PLA_H
