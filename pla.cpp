@@ -96,8 +96,11 @@ int find_path_pla(const Map* map, int thread_count) {
     omp_lock_t lock;
     omp_init_lock(&lock);
 
+
 #pragma omp parallel default(shared)
     {
+
+        int count = 0;
         vector<int> g_value(start_g_value);
 
         int id = omp_get_thread_num();
@@ -135,6 +138,8 @@ int find_path_pla(const Map* map, int thread_count) {
                 thread_array[id].open_list.pop();
             }
 
+            count ++;
+
 
             if (current_node->node_id == map->goal->node_id) {
                 if (g_value[current_node->node_id] < optimal_length) {
@@ -161,6 +166,8 @@ int find_path_pla(const Map* map, int thread_count) {
         }
 
         omp_unset_lock(&lock);
+
+        cout << "thread " << id << " count " << count << endl;
     }
 
     return optimal_length;

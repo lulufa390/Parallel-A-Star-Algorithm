@@ -48,6 +48,8 @@ int find_path_sequential(const Map* map, int thread_count) {
         }
     }
 
+    return INT32_MAX;
+
     
 }
 
