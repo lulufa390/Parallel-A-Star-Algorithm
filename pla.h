@@ -18,6 +18,8 @@ public:
 
 extern int optimal_length;
 
+extern int open_node_num;
+
 extern thread_state* thread_array;
 
 extern std::vector<int> start_g_value;

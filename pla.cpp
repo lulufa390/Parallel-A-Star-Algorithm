@@ -5,6 +5,7 @@
 #include "pla.h"
 
 int optimal_length;
+int open_node_num;
 thread_state* thread_array;
 std::vector<int> start_g_value;
 std::queue<pair<int, Node *>> wait_list;
@@ -69,6 +70,8 @@ void distribute_node(std::vector<pair<int, Node*> > node_list, int thread_count)
         int thread_id = rand() % thread_count;
         thread_array[thread_id].open_list.push(node_list[i]);
     }
+
+    open_node_num = node_list.size();
 }
 
 
@@ -76,7 +79,7 @@ int find_path_pla(const Map* map, int thread_count) {
 
     auto node_list = start_expand(map, thread_count);
 
-    const int busy_threshold = 5;
+    const int busy_threshold = 2;
 
     if (node_list.empty()) {
         std::cout << "do not need multi threads, the map is too small" << std::endl;
@@ -99,21 +102,21 @@ int find_path_pla(const Map* map, int thread_count) {
 
 #pragma omp parallel default(shared)
     {
-
-        int count = 0;
         vector<int> g_value(start_g_value);
 
         int id = omp_get_thread_num();
 
         omp_set_lock(&lock);
-        while (!thread_array[id].open_list.empty() || wait_list.size() != 0) {
+        while (open_node_num > 0) {
+
+             if (thread_array[id].open_list.empty() && wait_list.size() == 0) {
+                 continue;
+             }
 
             if (thread_array[id].open_list.size() > busy_threshold) {
                 wait_list.push(thread_array[id].open_list.top());
                 thread_array[id].open_list.pop();
             }
-
-            Node* current_node = nullptr;
 
             if (thread_array[id].open_list.size() == 0) {
                 if (wait_list.size() > 0) {
@@ -129,23 +132,21 @@ int find_path_pla(const Map* map, int thread_count) {
                     }
 
                 }
-
-                current_node = thread_array[id].open_list.top().second;
-                thread_array[id].open_list.pop();
-            }
-            else {
-                current_node = thread_array[id].open_list.top().second;
-                thread_array[id].open_list.pop();
             }
 
-            count ++;
+            Node* current_node = thread_array[id].open_list.top().second;
+            thread_array[id].open_list.pop();
 
 
             if (current_node->node_id == map->goal->node_id) {
                 if (g_value[current_node->node_id] < optimal_length) {
                     optimal_length = g_value[current_node->node_id];
                 }
+
             }
+
+            open_node_num--;
+
             omp_unset_lock(&lock);
 
 
@@ -160,14 +161,17 @@ int find_path_pla(const Map* map, int thread_count) {
                     g_value[node->node_id] = update_g_value;
                     int new_f = update_g_value + map->goal->compute_heuristic(node);
                     thread_array[id].open_list.push({new_f, node});
+
+                    omp_set_lock(&lock);
+                    open_node_num++;
+                    omp_unset_lock(&lock);
+
                 }
             }
             omp_set_lock(&lock);
         }
 
         omp_unset_lock(&lock);
-
-        cout << "thread " << id << " count " << count << endl;
     }
 
     return optimal_length;
