@@ -5,7 +5,7 @@
 #include "pla.h"
 
 int optimal_length;
-int open_node_num;
+std::atomic<int> open_node_num;
 thread_state* thread_array;
 std::vector<int> start_g_value;
 std::queue<pair<int, Node *>> wait_list;
@@ -79,7 +79,7 @@ int find_path_pla(const Map* map, int thread_count) {
 
     auto node_list = start_expand(map, thread_count);
 
-    const int busy_threshold = 2;
+    const int busy_threshold = 5;
 
     if (node_list.empty()) {
         std::cout << "do not need multi threads, the map is too small" << std::endl;
@@ -106,12 +106,17 @@ int find_path_pla(const Map* map, int thread_count) {
 
         int id = omp_get_thread_num();
 
-        omp_set_lock(&lock);
+
         while (open_node_num > 0) {
 
-             if (thread_array[id].open_list.empty() && wait_list.size() == 0) {
-                 continue;
-             }
+//            omp_set_lock(&lock);
+//             if (thread_array[id].open_list.empty() && wait_list.size() == 0) {
+////                 omp_unset_lock(&lock);
+////                 omp_set_lock(&lock);
+//                 continue;
+//             }
+
+            omp_set_lock(&lock);
 
             if (thread_array[id].open_list.size() > busy_threshold) {
                 wait_list.push(thread_array[id].open_list.top());
@@ -130,13 +135,17 @@ int find_path_pla(const Map* map, int thread_count) {
                     if (copy_g_value < g_value[fetch_element.second->node_id]) {
                         g_value[fetch_element.second->node_id] = copy_g_value;
                     }
-
+                }
+                else {
+                    omp_unset_lock(&lock);
+                    continue;
                 }
             }
 
             Node* current_node = thread_array[id].open_list.top().second;
             thread_array[id].open_list.pop();
 
+            thread_array[id].count++;
 
             if (current_node->node_id == map->goal->node_id) {
                 if (g_value[current_node->node_id] < optimal_length) {
@@ -162,16 +171,19 @@ int find_path_pla(const Map* map, int thread_count) {
                     int new_f = update_g_value + map->goal->compute_heuristic(node);
                     thread_array[id].open_list.push({new_f, node});
 
-                    omp_set_lock(&lock);
                     open_node_num++;
-                    omp_unset_lock(&lock);
-
                 }
             }
-            omp_set_lock(&lock);
+//            omp_set_lock(&lock);
         }
 
-        omp_unset_lock(&lock);
+//        omp_unset_lock(&lock);
+    }
+
+
+
+    for (int i = 0; i < thread_count; i++) {
+        std::cout << "thread " << i << ": " << thread_array[i].count << std::endl;
     }
 
     return optimal_length;

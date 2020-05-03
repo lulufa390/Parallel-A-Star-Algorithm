@@ -8,17 +8,22 @@
 #include <omp.h>
 #include <vector>
 #include <queue>
+#include <atomic>
 #include "map.h"
 
 class thread_state {
 public:
     priority_queue<pair<int, Node *>> open_list;
+    int count;
+
+public:
+    thread_state() : count(0){}
 };
 
 
 extern int optimal_length;
 
-extern int open_node_num;
+extern std::atomic<int> open_node_num;
 
 extern thread_state* thread_array;
 
