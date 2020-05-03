@@ -5,7 +5,7 @@
 #include "sequential.h"
 #include "bidirectional.h"
 #include "centralized.h"
-#include "distributed.h"
+#include "hda.h"
 #include "pla.h"
 
 #include <string>
@@ -64,8 +64,11 @@ int main()
                         //   {&find_path_spa, "SPA", 2},
                         //   {&find_path_spa, "SPA", 4},
                           {&find_path_hda_openmp, "HDA OpenMP", 1},
+                          {&find_path_hda_openmp_custom, "HDA OpenMP", 1},
                           {&find_path_hda_openmp, "HDA OpenMP", 2},
+                          {&find_path_hda_openmp_custom, "HDA OpenMP", 2},
                           {&find_path_hda_openmp, "HDA OpenMP", 4},
+                          {&find_path_hda_openmp_custom, "HDA OpenMP", 4},
                         //   {&find_path_pla, "PLA OpenMP", 4}
                         });
 

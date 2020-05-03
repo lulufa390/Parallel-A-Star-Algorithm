@@ -4,6 +4,6 @@
 
 int find_path_hda_openmp(const Map* map, int);
 
-int find_path_spa_custom(const Map* map, int);
+int find_path_hda_openmp_custom(const Map *map, int thread_count);
 
 #endif
