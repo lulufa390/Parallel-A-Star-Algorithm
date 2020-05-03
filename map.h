@@ -118,7 +118,7 @@ public:
                     default:
                         throw string("unknow direction");
                     }
-                    if (!block_goal && (newY != destY || newX != destX) && (y != destY || x != destX))
+                    if (!block_goal || ((newY != destY || newX != destX) && (y != destY || x != destX)))
                     {
                         node_matrix[y][x]->adjacent_list.push_back({node_matrix[newY][newX], 1});
                     }
