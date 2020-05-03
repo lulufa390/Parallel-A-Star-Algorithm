@@ -58,14 +58,13 @@ public:
     int width, height;
 
 public:
-
-    Map(string fileName)
+    Map(string fileName, bool block_goal = false)
     {
         ifstream input(fileName, ifstream::in);
         // int height, width;
         input >> width >> height;
 
-        node_set = vector<Node*>(width*height);
+        node_set = vector<Node *>(width * height);
 
         int startX, startY, destX, destY;
         input >> startX >> startY >> destX >> destY;
@@ -119,7 +118,10 @@ public:
                     default:
                         throw string("unknow direction");
                     }
-                    node_matrix[y][x]->adjacent_list.push_back({node_matrix[newY][newX], 1});
+                    if (!block_goal && (newY != destY || newX != destX) && (y != destY || x != destX))
+                    {
+                        node_matrix[y][x]->adjacent_list.push_back({node_matrix[newY][newX], 1});
+                    }
                 }
             }
         }
@@ -127,7 +129,6 @@ public:
         start = node_matrix[startY][startX];
 
         goal = node_matrix[destY][destX];
-
     }
 
     // Map(const Map &map)
