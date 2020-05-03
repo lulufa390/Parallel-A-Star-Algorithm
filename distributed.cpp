@@ -17,12 +17,13 @@ int find_path_hda_openmp(const Map *map, int thread_count)
 {
     omp_set_num_threads(thread_count);
     bool finished = false;
-    tbb::concurrent_priority_queue<pair<int, pair<int, Node *>>> queue[thread_count];
+    tbb::concurrent_priority_queue<pair<int, pair<Node*, Node *>>> queue[thread_count];
     int shortest = INT32_MAX;
 
     atomic_int remain_count;
     remain_count = 1;
-    queue[hash_node(map->start->node_id, thread_count)].push({0, {0, map->start}});
+    queue[hash_node(map->start->node_id, thread_count)].push({map->goal->compute_heuristic(map->start), {NULL, map->start}});
+    int count_array[thread_count];
 #pragma omp parallel
     {
         int id = omp_get_thread_num();
@@ -31,32 +32,23 @@ int find_path_hda_openmp(const Map *map, int thread_count)
 
         int goal_id = map->goal->node_id;
 
-        tbb::concurrent_priority_queue<pair<int, pair<int, Node *>>> &open_list = queue[id];
+        tbb::concurrent_priority_queue<pair<int, pair<Node*, Node *>>> &open_list = queue[id];
         unordered_map<int, int> g_value;
 
-        // g_value[map->start->node_id] = 0;
-
-        if (id == 1)
-        {
-            // system("sleep 0.8");
-        }
 
         while (!finished)
         {
 
-            // system("sleep 0.8");
-
-            // cout << id << " thread running " << endl;
-
-            remain_count > 0;
-            pair<int, pair<int, Node *>> item;
+// if (id == 0)
+            // cout << id << " thread running " << remain_count << endl;
+            pair<int, pair<Node*, Node *>> item;
             bool has_item = open_list.try_pop(item);
             if (!has_item)
             {
                 if (remain_count == 0)
                 {
                     // return NULL;
-                    cout << id << " thread break " << endl;
+                    // cout << id << " thread break " << endl;
                     break;
                 }
                 continue;
@@ -64,14 +56,16 @@ int find_path_hda_openmp(const Map *map, int thread_count)
 
             count++;
 
-            int current_g_value = item.second.first;
+
+            Node *prev_node = item.second.first;
             Node *current_node = item.second.second;
+            int current_g_value = item.first - map->goal->compute_heuristic(current_node);
 
             // cout << id << " thread handling " << current_node->node_id << endl;
 
             if (g_value.count(current_node->node_id) > 0 && current_g_value >= g_value[current_node->node_id])
             {
-                // cout << id << " thread continue on " << current_node->node_id << endl;
+                remain_count.fetch_add(-1);
                 continue;
             }
             else
@@ -79,39 +73,37 @@ int find_path_hda_openmp(const Map *map, int thread_count)
                 g_value[current_node->node_id] = current_g_value;
             }
 
-            // cout << "thread " << thread_id << "running: " << count << endl;
-
             if (current_node->node_id == goal_id)
             {
-                cout << count << endl;
-
                 shortest = g_value[current_node->node_id];
                 finished = true;
-                cout << id << " thread found " << current_node->node_id << endl;
-                // return NULL;
                 break;
             }
 
-            vector<pair<int, pair<int, Node *>>> expand_buffer;
+            vector<pair<int, pair<Node*, Node *>>> expand_buffer;
             for (auto edge : current_node->adjacent_list)
             {
                 Node *node = edge.first;
+                if (prev_node!=NULL&&prev_node->node_id==node->node_id) {
+                    continue;
+                }
                 int weight = edge.second;
 
                 int update_g_value = weight + current_g_value;
 
                 int new_f = update_g_value + map->goal->compute_heuristic(node);
-                expand_buffer.push_back({new_f, {update_g_value, node}});
+                expand_buffer.push_back({new_f, {current_node, node}});
             }
-            // pthread_mutex_lock(&lock);
+            remain_count.fetch_add(expand_buffer.size() - 1);
             for (auto item : expand_buffer)
             {
-                // open_list.push(item);
                 queue[hash_node(item.second.second->node_id, thread_count)].push(item);
             }
-            // pthread_mutex_unlock(&lock);
-            remain_count += expand_buffer.size() - 1;
         }
+        count_array[id] = count;
+    }
+    for (int i = 0; i < thread_count; i ++) {
+        cout << i << " thread takes " << count_array[i] << endl;
     }
     return shortest;
 }

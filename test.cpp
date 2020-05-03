@@ -52,20 +52,21 @@ int main()
 {
 
     cout << "Init" << endl;
-    string test_file_name = "maze_case/maze_1000_1000.txt";
-    Map *map = new Map(test_file_name);
+    string test_file_name = "maze_case/maze_2000_2000.txt";
+    Map *map = new Map(test_file_name, false);
     cout << "Init done" << endl;
 
-    vector<test_t> tests({{&find_path_sequential, "Sequential", 1},
+    vector<test_t> tests({
+                        {&find_path_sequential, "Sequential", 1},
                         //   {&find_path_bidirectional, "Bidirection", 2},
                         //   {&find_path_bidirectional_custom, "Custom bidirection", 2},
                         //   {&find_path_spa, "SPA", 1},
-                        //   {&find_path_spa, "SPA", 1},
+                        //   {&find_path_spa, "SPA", 2},
                         //   {&find_path_spa, "SPA", 4},
-                        //   {&find_path_hda_openmp, "HDA OpenMP", 1},
-                        //   {&find_path_hda_openmp, "HDA OpenMP", 2},
-                        //   {&find_path_hda_openmp, "HDA OpenMP", 4},
-                          {&find_path_pla, "PLA OpenMP", 4}
+                          {&find_path_hda_openmp, "HDA OpenMP", 1},
+                          {&find_path_hda_openmp, "HDA OpenMP", 2},
+                          {&find_path_hda_openmp, "HDA OpenMP", 4},
+                        //   {&find_path_pla, "PLA OpenMP", 4}
                         });
 
     for (int i = 0; i < tests.size(); i++)
