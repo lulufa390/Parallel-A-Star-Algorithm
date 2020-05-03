@@ -4,7 +4,7 @@
 #include "map.h"
 #include "sequential.h"
 #include "bidirectional.h"
-#include "centralized.h"
+#include "spa.h"
 #include "hda.h"
 #include "pla.h"
 
@@ -58,17 +58,17 @@ int main()
 
     vector<test_t> tests({
                         {&find_path_sequential, "Sequential", 1},
-                        //   {&find_path_bidirectional, "Bidirection", 2},
-                        //   {&find_path_bidirectional_custom, "Custom bidirection", 2},
+                          {&find_path_bidirectional, "Bidirection", 2},
+                          {&find_path_bidirectional_custom, "Custom bidirection", 2},
                         //   {&find_path_spa, "SPA", 1},
                         //   {&find_path_spa, "SPA", 2},
                         //   {&find_path_spa, "SPA", 4},
                           {&find_path_hda_openmp, "HDA OpenMP", 1},
-                          {&find_path_hda_openmp_custom, "HDA OpenMP", 1},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 1},
                           {&find_path_hda_openmp, "HDA OpenMP", 2},
-                          {&find_path_hda_openmp_custom, "HDA OpenMP", 2},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 2},
                           {&find_path_hda_openmp, "HDA OpenMP", 4},
-                          {&find_path_hda_openmp_custom, "HDA OpenMP", 4},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 4},
                         //   {&find_path_pla, "PLA OpenMP", 4}
                         });
 

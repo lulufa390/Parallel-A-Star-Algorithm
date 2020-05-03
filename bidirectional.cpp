@@ -197,6 +197,8 @@ struct bidirectionCustomThreadArgs
     vector<int> *g_value;
 
     int meet_id;
+
+    int *count;
 };
 
 static void *bidirection_custom_thread(void *vargp)
@@ -246,7 +248,8 @@ static void *bidirection_custom_thread(void *vargp)
         if (g_value[other][current_node->node_id] < INT32_MAX)
         {
             args->meet_id = current_node->node_id;
-            cout << count << endl;
+            // cout << count << endl;
+            args->count[id] = count;
             return NULL;
         }
 
@@ -276,6 +279,8 @@ int find_path_bidirectional_custom(const Map *map, int thread_count)
     struct bidirectionCustomThreadArgs args[2];
     vector<int> g_value[2];
 
+    int count[2] = {0};
+
     for (int i = 0; i < 2; i++)
     {
         g_value[i] = vector<int>(map->width * map->height, INT32_MAX);
@@ -283,6 +288,7 @@ int find_path_bidirectional_custom(const Map *map, int thread_count)
         args[i].map = map;
         args[i].g_value = g_value;
         args[i].meet_id = -1;
+        args[i].count = count;
     }
 
     pthread_create(&tid1, NULL, bidirection_custom_thread, (void *)&args[0]);
@@ -303,6 +309,7 @@ int find_path_bidirectional_custom(const Map *map, int thread_count)
                 shortest = new_len;
             }
         }
+        cout << i << " thread takes " << count[i] << endl;
     }
 
     return shortest;
