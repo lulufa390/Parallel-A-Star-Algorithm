@@ -106,8 +106,20 @@ int find_path_pla(const Map* map, int thread_count) {
 
         int id = omp_get_thread_num();
 
+        const int DELTA_NODE_FLUSH_PERIOD = 10;
+
+        int delta_node_flush_count = 0;
+        int delta_node_num = 0;
+
 
         while (open_node_num > 0) {
+
+            delta_node_flush_count ++;
+            if (delta_node_flush_count > DELTA_NODE_FLUSH_PERIOD) {
+                delta_node_flush_count = 0;
+                open_node_num += delta_node_num;
+                delta_node_num = 0;
+            }
 
 //            omp_set_lock(&lock);
 //             if (thread_array[id].open_list.empty() && wait_list.size() == 0) {
@@ -154,10 +166,11 @@ int find_path_pla(const Map* map, int thread_count) {
 
             }
 
-            open_node_num--;
+            // open_node_num--;
 
             omp_unset_lock(&lock);
 
+            delta_node_num -= 1;
 
             for (auto edge : current_node->adjacent_list)
             {
@@ -171,9 +184,10 @@ int find_path_pla(const Map* map, int thread_count) {
                     int new_f = update_g_value + map->goal->compute_heuristic(node);
                     thread_array[id].open_list.push({new_f, node});
 
-                    open_node_num++;
+                    delta_node_num++;
                 }
             }
+            // open_node_num += delta_node_num;
 //            omp_set_lock(&lock);
         }
 
