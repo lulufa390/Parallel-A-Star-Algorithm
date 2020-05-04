@@ -20,8 +20,12 @@ public:
 
     std::vector<thread_state*> neighbors;
 
+    omp_lock_t lock;
+
 public:
-    thread_state() : count(0){}
+    thread_state() : count(0){
+        omp_init_lock(&lock);
+    }
 };
 
 
@@ -36,7 +40,7 @@ extern std::vector<int> start_g_value;
 //extern std::queue<pair<int, Node *>> wait_list;
 
 
-int find_path_pla(const Map* map, int thread_count);
+TestResult* find_path_pla(const Map* map, int thread_count);
 
 
 #endif //FINAL_PLA_H
