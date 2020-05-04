@@ -83,12 +83,14 @@ void build_hypercube(int thread_count) {
             int neighbor = i ^ (1 << j);
             thread_array[i].neighbors.push_back(&thread_array[neighbor]);
         }
-        thread_array[i].neighbors.push_back(&thread_array[i]);
+//        thread_array[i].neighbors.push_back(&thread_array[i]);
     }
 }
 
 
-int find_path_pla(const Map* map, int thread_count) {
+TestResult* find_path_pla(const Map* map, int thread_count) {
+
+    TestResult* test_result = new TestResult(thread_count);
 
     auto node_list = start_expand(map, thread_count);
 
@@ -96,7 +98,8 @@ int find_path_pla(const Map* map, int thread_count) {
 
     if (node_list.empty()) {
         std::cout << "do not need multi threads, the map is too small" << std::endl;
-        return optimal_length;
+        test_result->shortest = optimal_length;
+        return test_result;
     }
     else {
         thread_array = new thread_state[thread_count];
@@ -107,9 +110,6 @@ int find_path_pla(const Map* map, int thread_count) {
     }
 
     optimal_length = INT32_MAX;
-
-    omp_lock_t lock;
-    omp_init_lock(&lock);
 
 
 #pragma omp parallel default(shared)
@@ -133,43 +133,67 @@ int find_path_pla(const Map* map, int thread_count) {
                 delta_node_num = 0;
             }
 
-            omp_set_lock(&lock);
+            omp_set_lock(&thread_array[id].lock);
 
-            if (thread_array[id].open_list.size() > busy_threshold) {
+            if (thread_array[id].open_list.size() > busy_threshold && thread_count > 1) {
                 thread_array[id].wait_list.push(thread_array[id].open_list.top());
                 thread_array[id].open_list.pop();
             }
 
-            if (thread_array[id].open_list.size() == 0) {
+            int current_open_size = thread_array[id].open_list.size();
+            omp_unset_lock(&thread_array[id].lock);
+
+            if (current_open_size == 0) {
+
+//                for (auto neighbor: thread_array[id].neighbors) {
+//                    omp_set_lock(&neighbor->lock);
+//                }
 
                 int busiest_neighbor = -1;
                 int longest_wl = 0;
                 for (int i = 0; i < thread_array[id].neighbors.size(); i++) {
+
                     auto neighbor = thread_array[id].neighbors[i];
+
+                    omp_set_lock(&neighbor->lock);
+
                     if (neighbor->wait_list.size() > longest_wl) {
                         busiest_neighbor = i;
                         longest_wl = neighbor->wait_list.size();
                     }
+
+                    omp_unset_lock(&neighbor->lock);
                 }
 
 
                 if (longest_wl > 0) {
-                    auto fetch_element = thread_array[id].neighbors[busiest_neighbor]->wait_list.front();
-                    thread_array[id].neighbors[busiest_neighbor]->wait_list.pop();
 
-                    thread_array[id].open_list.push(fetch_element);
-                    int copy_g_value = fetch_element.first - map->goal->compute_heuristic(fetch_element.second);
-                    if (copy_g_value < g_value[fetch_element.second->node_id]) {
-                        g_value[fetch_element.second->node_id] = copy_g_value;
+                    omp_set_lock(&thread_array[id].neighbors[busiest_neighbor]->lock);
+
+                    if (thread_array[id].neighbors[busiest_neighbor]->wait_list.size() > 0) {
+                        auto fetch_element = thread_array[id].neighbors[busiest_neighbor]->wait_list.front();
+
+                        thread_array[id].neighbors[busiest_neighbor]->wait_list.pop();
+
+                        thread_array[id].open_list.push(fetch_element);
+                        int copy_g_value = fetch_element.first - map->goal->compute_heuristic(fetch_element.second);
+                        if (copy_g_value < g_value[fetch_element.second->node_id]) {
+                            g_value[fetch_element.second->node_id] = copy_g_value;
+                        }
+                        omp_unset_lock(&thread_array[id].neighbors[busiest_neighbor]->lock);
+                    }
+                    else {
+                        omp_unset_lock(&thread_array[id].neighbors[busiest_neighbor]->lock);
+                        continue;
                     }
                 }
 
                 else {
-                    omp_unset_lock(&lock);
                     continue;
                 }
             }
 
+            omp_set_lock(&thread_array[id].lock);
             Node* current_node = thread_array[id].open_list.top().second;
             thread_array[id].open_list.pop();
 
@@ -179,12 +203,13 @@ int find_path_pla(const Map* map, int thread_count) {
                 if (g_value[current_node->node_id] < optimal_length) {
                     optimal_length = g_value[current_node->node_id];
                 }
-
             }
 
             // open_node_num--;
 
-            omp_unset_lock(&lock);
+//            omp_unset_lock(&lock);
+
+            omp_unset_lock(&thread_array[id].lock);
 
             delta_node_num -= 1;
 
@@ -216,5 +241,10 @@ int find_path_pla(const Map* map, int thread_count) {
         std::cout << "thread " << i << ": " << thread_array[i].count << std::endl;
     }
 
-    return optimal_length;
+    test_result->shortest = optimal_length;
+    for (int i = 0; i < thread_count; i++) {
+        test_result->thread_explore[i] = thread_array[i].count;
+    }
+
+    return test_result;
 }
