@@ -16,6 +16,10 @@ public:
     priority_queue<pair<int, Node *>> open_list;
     int count;
 
+    std::queue<pair<int, Node *>> wait_list;
+
+    std::vector<thread_state*> neighbors;
+
 public:
     thread_state() : count(0){}
 };
@@ -29,7 +33,7 @@ extern thread_state* thread_array;
 
 extern std::vector<int> start_g_value;
 
-extern std::queue<pair<int, Node *>> wait_list;
+//extern std::queue<pair<int, Node *>> wait_list;
 
 
 int find_path_pla(const Map* map, int thread_count);
