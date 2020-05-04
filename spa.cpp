@@ -21,6 +21,8 @@ struct spaCustomThreadArgs
     pthread_mutex_t *lock;
     priority_queue<pair<int, Node *>> *open_list;
     int *remain_count;
+
+    int *count;
 };
 
 static void *spa_custom_thread(void *vargp)
@@ -78,12 +80,12 @@ static void *spa_custom_thread(void *vargp)
                 continue;
             }
             int prefetch_count = 0;
-            while (prefetch_count < MAX_PREFETCH_COUNT&&open_list.size() > 0)
+            while (prefetch_count < MAX_PREFETCH_COUNT && open_list.size() > 0)
             {
                 auto item = open_list.top();
                 open_list.pop();
                 local_open_list.push(item);
-                prefetch_count ++;
+                prefetch_count++;
             }
             pthread_mutex_unlock(&lock);
             // cout << thread_id << " thread take " << endl;
@@ -125,12 +127,13 @@ static void *spa_custom_thread(void *vargp)
 
     // cout << "thread " << thread_id << " done" << endl;
 
-    cout << count << endl;
+    // cout << count << endl;
+    args->count[thread_id] = count;
 
     return NULL;
 }
 
-int find_path_spa_custom(const Map *map, int thread_count)
+TestResult *find_path_spa_custom(const Map *map, int thread_count)
 {
     pthread_t tid[thread_count];
 
@@ -145,6 +148,7 @@ int find_path_spa_custom(const Map *map, int thread_count)
     int remain_count;
 
     struct spaCustomThreadArgs args[thread_count];
+    int count[thread_count];
 
     for (int i = 0; i < thread_count; i++)
     {
@@ -156,6 +160,7 @@ int find_path_spa_custom(const Map *map, int thread_count)
         args[i].lock = &lock;
         args[i].open_list = &open_list;
         args[i].remain_count = &remain_count;
+        args[i].count = count;
     }
 
     int goal_id = map->goal->node_id;
@@ -174,7 +179,14 @@ int find_path_spa_custom(const Map *map, int thread_count)
         pthread_join(tid[i], NULL);
     }
 
-    return shortest;
+    TestResult *ret = new TestResult(thread_count);
+    ret->shortest = shortest;
+    for (int i = 0; i < thread_count; i++)
+    {
+        ret->thread_explore[i] = count[i];
+    }
+
+    return ret;
 }
 
 struct spaThreadArgs
@@ -190,6 +202,8 @@ struct spaThreadArgs
     pthread_mutex_t *lock;
     tbb::concurrent_priority_queue<pair<int, Node *>> *open_list;
     atomic_int *remain_count;
+
+    int *count;
 };
 
 static void *spa_thread(void *vargp)
@@ -231,7 +245,8 @@ static void *spa_thread(void *vargp)
         {
             if (remain_count == 0)
             {
-                return NULL;
+                // return NULL;
+                break;
             }
             continue;
         }
@@ -243,11 +258,12 @@ static void *spa_thread(void *vargp)
 
         if (current_node->node_id == goal_id)
         {
-            cout << count << endl;
+            // cout << count << endl;
 
             shortest = g_value[current_node->node_id];
             finished = true;
-            return NULL;
+            // return NULL;
+            break;
         }
 
         vector<pair<int, Node *>> expand_buffer;
@@ -274,12 +290,13 @@ static void *spa_thread(void *vargp)
         remain_count += expand_buffer.size() - 1;
     }
 
-    cout << count << endl;
+    // cout << count << endl;
+    args->count[thread_id] = count;
 
     return NULL;
 }
 
-int find_path_spa(const Map *map, int thread_count)
+TestResult *find_path_spa(const Map *map, int thread_count)
 {
     pthread_t tid[thread_count];
 
@@ -294,6 +311,7 @@ int find_path_spa(const Map *map, int thread_count)
     atomic_int remain_count;
 
     struct spaThreadArgs args[thread_count];
+    int count[thread_count];
 
     for (int i = 0; i < thread_count; i++)
     {
@@ -305,6 +323,7 @@ int find_path_spa(const Map *map, int thread_count)
         args[i].lock = &lock;
         args[i].open_list = &open_list;
         args[i].remain_count = &remain_count;
+        args[i].count = count;
     }
 
     int goal_id = map->goal->node_id;
@@ -323,5 +342,13 @@ int find_path_spa(const Map *map, int thread_count)
         pthread_join(tid[i], NULL);
     }
 
-    return shortest;
+    TestResult *ret = new TestResult(thread_count);
+    ret->shortest = shortest;
+    for (int i = 0; i < thread_count; i++)
+    {
+        ret->thread_explore[i] = count[i];
+    }
+
+    // return shortest;
+    return ret;
 }

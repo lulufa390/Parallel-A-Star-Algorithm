@@ -15,6 +15,19 @@
 
 using namespace std;
 
+class TestResult
+{
+public:
+    int shortest;
+    int* thread_explore;
+    TestResult (int thread_count) {
+        thread_explore = new int[thread_count];
+    }
+    ~TestResult() {
+        delete thread_explore;
+    }
+};
+
 class Node
 {
 public:

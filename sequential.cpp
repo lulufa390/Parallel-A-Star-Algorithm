@@ -8,7 +8,7 @@
 
 using namespace std;
 
-int find_path_sequential(const Map* map, int thread_count) {
+TestResult* find_path_sequential(const Map* map, int thread_count) {
     priority_queue<pair<int, Node *>> open_list;
 
     int goal_id = map->goal->node_id;
@@ -27,9 +27,10 @@ int find_path_sequential(const Map* map, int thread_count) {
         open_list.pop();
 
         if (current_node->node_id == goal_id) {
-            cout << count << endl;
+            // cout << count << endl;
             
-            return g_value[current_node->node_id];
+            // return g_value[current_node->node_id];
+            break;
         }
 
         for (auto edge : current_node->adjacent_list)
@@ -48,7 +49,11 @@ int find_path_sequential(const Map* map, int thread_count) {
         }
     }
 
-    return INT32_MAX;
+    TestResult *ret = new TestResult(thread_count);
+    ret->shortest = g_value[map->goal->node_id];
+    ret->thread_explore[0] = count; 
+    return ret;
+    // return INT32_MAX;
 
     
 }

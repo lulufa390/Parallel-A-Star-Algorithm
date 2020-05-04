@@ -16,14 +16,14 @@ using namespace std;
 typedef struct test_t
 {
     chrono::_V2::steady_clock::time_point start, stop;
-    int (*func)(const Map *map, int thread_count);
+    TestResult* (*func)(const Map *map, int thread_count);
     string test_name;
 
-    int shortest;
+    TestResult* result;
 
     int thread_count;
 
-    test_t(int (*func)(const Map *map, int thread_count), string test_name, int thread_count)
+    test_t(TestResult* (*func)(const Map *map, int thread_count), string test_name, int thread_count)
     {
         this->func = func;
         this->test_name = test_name;
@@ -34,7 +34,7 @@ typedef struct test_t
     {
         // system("date");
         start = chrono::steady_clock::now();
-        shortest = func(map, thread_count);
+        result = func(map, thread_count);
         stop = chrono::steady_clock::now();
         // system("date");
         // cout << "start " << start << " end " << stop << endl;
@@ -43,8 +43,20 @@ typedef struct test_t
     void show_result()
     {
         cout << test_name << " " << thread_count << endl;
-        cout << " Total Time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << "ms" << endl;
-        cout << " shortest path length : " << shortest << endl;
+        auto time_taken = chrono::duration_cast<chrono::milliseconds>(stop - start).count();
+        cout << "Total Time : " << time_taken << "ms" << endl;
+        cout << "shortest path length : " << result->shortest << endl;
+        int sum = 0;
+        for (int i = 0; i < thread_count; i ++) {
+            // cout << "Thread " << i << " explores " << result->thread_explore[i] << " nodes";
+            sum += result->thread_explore[i];
+        }
+        double mean = sum*1.0/thread_count;
+        cout << "Explore " << sum << " nodes in total" << endl;
+        cout << "Explore " << fixed << mean << " nodes in avg" << endl;
+        cout << "Overal explore rate: " << fixed << sum*1.0/time_taken*1000 << endl;
+        cout << "Avg explore rate: " << fixed << mean / time_taken*1000 << endl;
+
     }
 } test_t;
 
@@ -52,23 +64,24 @@ int main()
 {
 
     cout << "Init" << endl;
-    string test_file_name = "maze_case/maze_2000_2000.txt";
-    Map *map = new Map(test_file_name, false);
+    string test_file_name = "maze_case/maze_1000_1000.txt";
+    Map *map = new Map(test_file_name, true);
     cout << "Init done" << endl;
 
     vector<test_t> tests({
-                        {&find_path_sequential, "Sequential", 1},
+                        // {&find_path_sequential, "Sequential", 1},
                           {&find_path_bidirectional, "Bidirection", 2},
                           {&find_path_bidirectional_custom, "Custom bidirection", 2},
                         //   {&find_path_spa, "SPA", 1},
                         //   {&find_path_spa, "SPA", 2},
+                        //   {&find_path_spa_custom, "Custom SPA", 2},
                         //   {&find_path_spa, "SPA", 4},
-                          {&find_path_hda_openmp, "HDA OpenMP", 1},
-                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 1},
-                          {&find_path_hda_openmp, "HDA OpenMP", 2},
-                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 2},
-                          {&find_path_hda_openmp, "HDA OpenMP", 4},
-                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 4},
+                        //   {&find_path_hda_openmp, "HDA OpenMP", 1},
+                        //   {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 1},
+                        //   {&find_path_hda_openmp, "HDA OpenMP", 2},
+                        //   {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 2},
+                        //   {&find_path_hda_openmp, "HDA OpenMP", 4},
+                        //   {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 4},
                         //   {&find_path_pla, "PLA OpenMP", 4}
                         });
 

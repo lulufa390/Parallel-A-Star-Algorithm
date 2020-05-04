@@ -14,17 +14,19 @@ int hash_node(int node_id, int thread_count)
 }
 
 
-int find_path_hda_openmp(const Map *map, int thread_count)
+TestResult* find_path_hda_openmp(const Map *map, int thread_count)
 {
     omp_set_num_threads(thread_count);
     bool finished = false;
     tbb::concurrent_queue<pair<int, pair<Node *, Node *>>> queue[thread_count];
-    int shortest = INT32_MAX;
+    // int shortest = INT32_MAX;
 
     atomic_int remain_count;
     remain_count = 1;
     queue[hash_node(map->start->node_id, thread_count)].push({map->goal->compute_heuristic(map->start), {NULL, map->start}});
-    int count_array[thread_count];
+    // int count_array[thread_count];
+    TestResult* ret = new TestResult(thread_count);
+    ret->shortest = INT32_MAX;
 #pragma omp parallel
     {
         int id = omp_get_thread_num();
@@ -83,7 +85,7 @@ int find_path_hda_openmp(const Map *map, int thread_count)
 
             if (current_node->node_id == goal_id)
             {
-                shortest = g_value[current_node->node_id];
+                ret->shortest = g_value[current_node->node_id];
                 finished = true;
                 break;
             }
@@ -109,27 +111,29 @@ int find_path_hda_openmp(const Map *map, int thread_count)
                 queue[hash_node(item.second.second->node_id, thread_count)].push(item);
             }
         }
-        count_array[id] = count;
+        ret->thread_explore[id] = count;
     }
-    for (int i = 0; i < thread_count; i++)
-    {
-        cout << i << " thread takes " << count_array[i] << endl;
-    }
-    return shortest;
+    // for (int i = 0; i < thread_count; i++)
+    // {
+    //     cout << i << " thread takes " << count_array[i] << endl;
+    // }
+    return ret;
 }
 
 
-int find_path_hda_openmp_custom(const Map *map, int thread_count)
+TestResult* find_path_hda_openmp_custom(const Map *map, int thread_count)
 {
     omp_set_num_threads(thread_count);
     bool finished = false;
     tbb::concurrent_priority_queue<pair<int, pair<Node*, Node *>>> queue[thread_count];
-    int shortest = INT32_MAX;
+    // int shortest = INT32_MAX;
 
     atomic_int remain_count;
     remain_count = 1;
     queue[hash_node(map->start->node_id, thread_count)].push({map->goal->compute_heuristic(map->start), {NULL, map->start}});
-    int count_array[thread_count];
+    // int count_array[thread_count];
+    TestResult* ret = new TestResult(thread_count);
+    ret->shortest = INT32_MAX;
 #pragma omp parallel
     {
         int id = omp_get_thread_num();
@@ -181,7 +185,7 @@ int find_path_hda_openmp_custom(const Map *map, int thread_count)
 
             if (current_node->node_id == goal_id)
             {
-                shortest = g_value[current_node->node_id];
+                ret->shortest = g_value[current_node->node_id];
                 finished = true;
                 break;
             }
@@ -206,12 +210,12 @@ int find_path_hda_openmp_custom(const Map *map, int thread_count)
                 queue[hash_node(item.second.second->node_id, thread_count)].push(item);
             }
         }
-        count_array[id] = count;
+        ret->thread_explore[id] = count;
     }
-    for (int i = 0; i < thread_count; i ++) {
-        cout << i << " thread takes " << count_array[i] << endl;
-    }
-    return shortest;
+    // for (int i = 0; i < thread_count; i ++) {
+    //     cout << i << " thread takes " << count_array[i] << endl;
+    // }
+    return ret;
 }
 
 // int main()

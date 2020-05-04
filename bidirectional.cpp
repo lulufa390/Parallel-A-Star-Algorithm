@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const int max_weight = 4096 * 4096;
+const int max_weight = 20000*20000;
 
 struct bidirectionThreadArgs
 {
@@ -26,6 +26,8 @@ struct bidirectionThreadArgs
     unordered_set<int> *middle_list_id;
 
     pthread_mutex_t *lock;
+
+    int *count;
 };
 
 static void *bidirection_thread(void *vargp)
@@ -70,7 +72,7 @@ static void *bidirection_thread(void *vargp)
 
     while (!finished)
     {
-        count++;
+        
         Node *current_node = open_list.top().second;
         open_list.pop();
 
@@ -92,6 +94,7 @@ static void *bidirection_thread(void *vargp)
                         f2_value[index][node->node_id] = g2_value[index][node->node_id] + goal->compute_heuristic(node);
 
                         open_list.push({g2_value[index][node->node_id], node});
+                        count++;
 
                         if (g2_value[0][node->node_id] + g2_value[1][node->node_id] < current_shortest)
                         {
@@ -100,7 +103,7 @@ static void *bidirection_thread(void *vargp)
                             if (g2_value[0][node->node_id] + g2_value[1][node->node_id] < current_shortest)
                             {
                                 current_shortest = g2_value[0][node->node_id] + g2_value[1][node->node_id];
-                                cout << current_shortest << endl;
+                                // cout << current_shortest << endl;
                             }
 
                             pthread_mutex_unlock(&lock);
@@ -123,12 +126,14 @@ static void *bidirection_thread(void *vargp)
         }
     }
 
-    cout << "thread " << index << " stops " << count << endl;
+    args->count[index] = count;
+
+    // cout << "thread " << index << " stops " << count << endl;
 
     return NULL;
 }
 
-int find_path_bidirectional(const Map *map, int thread_count)
+TestResult* find_path_bidirectional(const Map *map, int thread_count)
 {
 
     pthread_t tid1, tid2;
@@ -147,7 +152,7 @@ int find_path_bidirectional(const Map *map, int thread_count)
     f2_value[0] = vector<int>(map->height * map->height, max_weight);
     f2_value[1] = vector<int>(map->height * map->height, max_weight);
 
-    cout << g2_value[0].size() << endl;
+    // cout << g2_value[0].size() << endl;
 
     current_shortest = max_weight;
 
@@ -167,6 +172,8 @@ int find_path_bidirectional(const Map *map, int thread_count)
 
     pthread_mutex_t lock;
 
+    int count[2];
+
     for (int i = 0; i < 2; i++)
     {
         args[i].id = i;
@@ -177,6 +184,7 @@ int find_path_bidirectional(const Map *map, int thread_count)
         args[i].current_shortest = &current_shortest;
         args[i].middle_list_id = &middle_list_id;
         args[i].lock = &lock;
+        args[i].count = count;
     }
 
     pthread_mutex_init(&lock, NULL);
@@ -187,7 +195,13 @@ int find_path_bidirectional(const Map *map, int thread_count)
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
 
-    return current_shortest;
+    TestResult* ret = new TestResult(2);
+    ret->shortest = current_shortest;
+    ret->thread_explore[0] = count[0];
+    ret->thread_explore[1] = count[1];
+
+    return ret;
+    // return current_shortest;
 }
 
 struct bidirectionCustomThreadArgs
@@ -249,8 +263,8 @@ static void *bidirection_custom_thread(void *vargp)
         {
             args->meet_id = current_node->node_id;
             // cout << count << endl;
-            args->count[id] = count;
-            return NULL;
+            // return NULL;
+            break;
         }
 
         for (auto edge : current_node->adjacent_list)
@@ -269,9 +283,10 @@ static void *bidirection_custom_thread(void *vargp)
             }
         }
     }
+    args->count[id] = count;
 }
 
-int find_path_bidirectional_custom(const Map *map, int thread_count)
+TestResult* find_path_bidirectional_custom(const Map *map, int thread_count)
 {
 
     pthread_t tid1, tid2;
@@ -297,20 +312,22 @@ int find_path_bidirectional_custom(const Map *map, int thread_count)
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
 
-    int shortest = INT32_MAX;
+    TestResult* ret = new TestResult(2);
+    ret->shortest = INT32_MAX;
     for (int i = 0; i < 2; i++)
     {
         if (args[i].meet_id >= 0)
         {
             int id = args[i].meet_id;
             int new_len = g_value[0][id] + g_value[1][id];
-            if (new_len < shortest)
+            if (new_len < ret->shortest)
             {
-                shortest = new_len;
+                ret->shortest = new_len;
             }
         }
-        cout << i << " thread takes " << count[i] << endl;
+        // cout << i << " thread takes " << count[i] << endl;
+        ret->thread_explore[i] = count[i];
     }
 
-    return shortest;
+    return ret;
 }
