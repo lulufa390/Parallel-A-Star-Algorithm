@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <cmath>
 
+#include <tbb/concurrent_unordered_set.h>
+
 #include "map.h"
 #include "bidirectional.h"
 
@@ -23,7 +25,7 @@ struct bidirectionThreadArgs
     // shared global variable
     long *current_shortest;
     //priority_queue<Node *> middle_list;
-    unordered_set<int> *middle_list_id;
+    tbb::concurrent_unordered_set<int> *middle_list_id;
 
     pthread_mutex_t *lock;
 
@@ -39,7 +41,7 @@ static void *bidirection_thread(void *vargp)
     vector<int> *g2_value = args->g2_value;
     vector<int> *f2_value = args->f2_value;
 
-    unordered_set<int> &middle_list_id = *(args->middle_list_id);
+    tbb::concurrent_unordered_set<int> &middle_list_id = *(args->middle_list_id);
     long &current_shortest = *(args->current_shortest);
 
     pthread_mutex_t &lock = *(args->lock);
@@ -76,7 +78,7 @@ static void *bidirection_thread(void *vargp)
         Node *current_node = open_list.top().second;
         open_list.pop();
 
-        if (middle_list_id.find(current_node->node_id) != middle_list_id.end())
+        if (middle_list_id.find(current_node->node_id) == middle_list_id.end())
         {
             if (f2_value[index][current_node->node_id] < current_shortest ||
                 g2_value[index][current_node->node_id] + f[other] - start->compute_heuristic(current_node) < current_shortest)
@@ -87,7 +89,7 @@ static void *bidirection_thread(void *vargp)
                     Node *node = edge.first;
                     int weight = edge.second;
 
-                    if (middle_list_id.find(node->node_id) != middle_list_id.end() || g2_value[index][node->node_id] > g2_value[index][current_node->node_id] + weight)
+                    if (middle_list_id.find(node->node_id) == middle_list_id.end() || g2_value[index][node->node_id] > g2_value[index][current_node->node_id] + weight)
                     {
 
                         g2_value[index][node->node_id] = g2_value[index][current_node->node_id] + weight;
@@ -112,7 +114,8 @@ static void *bidirection_thread(void *vargp)
                 }
             }
 
-            middle_list_id.erase(current_node->node_id);
+            middle_list_id.insert(current_node->node_id);
+            // middle_list_id.
         }
 
         if (open_list.size() > 0)
@@ -144,7 +147,7 @@ TestResult* find_path_bidirectional(const Map *map, int thread_count)
     int f[2];
 
     long current_shortest;
-    unordered_set<int> middle_list_id;
+    tbb::concurrent_unordered_set<int> middle_list_id;
 
     g2_value[0] = vector<int>(map->height * map->height, max_weight);
     g2_value[1] = vector<int>(map->height * map->height, max_weight);
@@ -156,11 +159,11 @@ TestResult* find_path_bidirectional(const Map *map, int thread_count)
 
     current_shortest = max_weight;
 
-    for (Node *node : map->node_set)
-    {
-        // node->g2_value[0] = node->g2_value[1] = max_weight;
-        middle_list_id.insert(node->node_id);
-    }
+    // for (Node *node : map->node_set)
+    // {
+    //     // node->g2_value[0] = node->g2_value[1] = max_weight;
+    //     middle_list_id.insert(node->node_id);
+    // }
 
     g2_value[0][map->start->node_id] = 0;
     g2_value[1][map->goal->node_id] = 0;
