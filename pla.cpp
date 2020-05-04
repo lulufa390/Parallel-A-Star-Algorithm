@@ -68,7 +68,7 @@ void distribute_node(std::vector<pair<int, Node*> > node_list, int thread_count)
     srand(time(NULL));
     for (int i = 0; i < node_list.size(); i++) {
         int thread_id = rand() % thread_count;
-        thread_array[thread_id].open_list.push(node_list[i]);
+        thread_array[thread_id].open_list.push({node_list[i].first, {NULL, node_list[i].second}});
     }
 
     open_node_num = node_list.size();
@@ -94,7 +94,7 @@ TestResult* find_path_pla(const Map* map, int thread_count) {
 
     auto node_list = start_expand(map, thread_count);
 
-    const int busy_threshold = 5;
+    const int busy_threshold = 100;
 
     if (node_list.empty()) {
         std::cout << "do not need multi threads, the map is too small" << std::endl;
@@ -176,9 +176,9 @@ TestResult* find_path_pla(const Map* map, int thread_count) {
                         thread_array[id].neighbors[busiest_neighbor]->wait_list.pop();
 
                         thread_array[id].open_list.push(fetch_element);
-                        int copy_g_value = fetch_element.first - map->goal->compute_heuristic(fetch_element.second);
-                        if (copy_g_value < g_value[fetch_element.second->node_id]) {
-                            g_value[fetch_element.second->node_id] = copy_g_value;
+                        int copy_g_value = fetch_element.first - map->goal->compute_heuristic(fetch_element.second.second);
+                        if (copy_g_value < g_value[fetch_element.second.second->node_id]) {
+                            g_value[fetch_element.second.second->node_id] = copy_g_value;
                         }
                         omp_unset_lock(&thread_array[id].neighbors[busiest_neighbor]->lock);
                     }
@@ -194,7 +194,8 @@ TestResult* find_path_pla(const Map* map, int thread_count) {
             }
 
             omp_set_lock(&thread_array[id].lock);
-            Node* current_node = thread_array[id].open_list.top().second;
+            Node* current_node = thread_array[id].open_list.top().second.second;
+            Node* prev_node = thread_array[id].open_list.top().second.first;
             thread_array[id].open_list.pop();
 
             thread_array[id].count++;
@@ -216,6 +217,9 @@ TestResult* find_path_pla(const Map* map, int thread_count) {
             for (auto edge : current_node->adjacent_list)
             {
                 Node *node = edge.first;
+                if (prev_node!=NULL && prev_node->node_id==node->node_id) {
+                    continue;
+                }
                 int weight = edge.second;
 
                 int update_g_value = weight + g_value[current_node->node_id];
@@ -223,7 +227,7 @@ TestResult* find_path_pla(const Map* map, int thread_count) {
                 if (update_g_value < g_value[node->node_id]) {
                     g_value[node->node_id] = update_g_value;
                     int new_f = update_g_value + map->goal->compute_heuristic(node);
-                    thread_array[id].open_list.push({new_f, node});
+                    thread_array[id].open_list.push({new_f, {current_node, node}});
 
                     delta_node_num++;
                 }

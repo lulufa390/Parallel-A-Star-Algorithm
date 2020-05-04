@@ -13,10 +13,10 @@
 
 class thread_state {
 public:
-    priority_queue<pair<int, Node *>> open_list;
+    priority_queue<pair<int, pair<Node*, Node *>>> open_list;
     int count;
 
-    std::queue<pair<int, Node *>> wait_list;
+    std::queue<pair<int, pair<Node*,Node *>>> wait_list;
 
     std::vector<thread_state*> neighbors;
 
