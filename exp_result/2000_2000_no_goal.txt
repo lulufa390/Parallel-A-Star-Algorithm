@@ -1,0 +1,235 @@
+LD_PRELOAD=tbb/lib/intel64/gcc4.8/libtbb.so.2 ./main maze_case/maze_2000_2000.txt 
+Init
+Loading input file: maze_case/maze_2000_2000.txt
+Init done
+Sequential 1
+Total Time : 6505ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 3999999.000000 nodes in avg
+Overal explore rate: 614911.452729
+Avg explore rate: 614911.452729
+Bidirection 2
+Total Time : 13929ms
+shortest path length : 400000000
+Explore 3999998 nodes in total
+Explore 1999999.000000 nodes in avg
+Overal explore rate: 287170.507574
+Avg explore rate: 143585.253787
+Custom bidirection 2
+Total Time : 6901ms
+shortest path length : 2147483647
+Explore 4000000 nodes in total
+Explore 2000000.000000 nodes in avg
+Overal explore rate: 579626.141139
+Avg explore rate: 289813.070569
+SPA 1
+Total Time : 7096ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 3999999.000000 nodes in avg
+Overal explore rate: 563697.717024
+Avg explore rate: 563697.717024
+SPA 2
+Total Time : 7030ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 1999999.500000 nodes in avg
+Overal explore rate: 568989.900427
+Avg explore rate: 284494.950213
+SPA 4
+Total Time : 7127ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 999999.750000 nodes in avg
+Overal explore rate: 561245.825733
+Avg explore rate: 140311.456433
+SPA 8
+Total Time : 6895ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 499999.875000 nodes in avg
+Overal explore rate: 580130.384336
+Avg explore rate: 72516.298042
+SPA 16
+Total Time : 7022ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 249999.937500 nodes in avg
+Overal explore rate: 569638.137283
+Avg explore rate: 35602.383580
+SPA 32
+Total Time : 6896ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 124999.968750 nodes in avg
+Overal explore rate: 580046.258701
+Avg explore rate: 18126.445584
+Custom SPA 1
+Total Time : 3397ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 3999999.000000 nodes in avg
+Overal explore rate: 1177509.272888
+Avg explore rate: 1177509.272888
+Custom SPA 2
+Total Time : 4612ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 1999999.500000 nodes in avg
+Overal explore rate: 867302.471813
+Avg explore rate: 433651.235906
+Custom SPA 4
+Total Time : 5224ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 999999.750000 nodes in avg
+Overal explore rate: 765696.592649
+Avg explore rate: 191424.148162
+Custom SPA 8
+Total Time : 7131ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 499999.875000 nodes in avg
+Overal explore rate: 560931.005469
+Avg explore rate: 70116.375684
+Custom SPA 16
+Total Time : 9509ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 249999.937500 nodes in avg
+Overal explore rate: 420654.011989
+Avg explore rate: 26290.875749
+Custom SPA 32
+Total Time : 24625ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 124999.968750 nodes in avg
+Overal explore rate: 162436.507614
+Avg explore rate: 5076.140863
+HDA OpenMP 1
+Total Time : 12695ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 3999999.000000 nodes in avg
+Overal explore rate: 315084.600236
+Avg explore rate: 315084.600236
+HDA OpenMP 2
+Total Time : 6122ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 1999999.500000 nodes in avg
+Overal explore rate: 653381.084613
+Avg explore rate: 326690.542306
+HDA OpenMP 4
+Total Time : 3862ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 999999.750000 nodes in avg
+Overal explore rate: 1035732.522009
+Avg explore rate: 258933.130502
+HDA OpenMP 8
+Total Time : 2929ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 499999.875000 nodes in avg
+Overal explore rate: 1365653.465347
+Avg explore rate: 170706.683168
+HDA OpenMP 16
+Total Time : 2326ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 249999.937500 nodes in avg
+Overal explore rate: 1719690.025795
+Avg explore rate: 107480.626612
+HDA OpenMP 32
+Total Time : 2648ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 124999.968750 nodes in avg
+Overal explore rate: 1510573.640483
+Avg explore rate: 47205.426265
+Custom HDA OpenMP 1
+Total Time : 10292ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 3999999.000000 nodes in avg
+Overal explore rate: 388651.282550
+Avg explore rate: 388651.282550
+Custom HDA OpenMP 2
+Total Time : 6727ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 1999999.500000 nodes in avg
+Overal explore rate: 594618.552103
+Avg explore rate: 297309.276052
+Custom HDA OpenMP 4
+Total Time : 4542ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 999999.750000 nodes in avg
+Overal explore rate: 880669.088507
+Avg explore rate: 220167.272127
+Custom HDA OpenMP 8
+Total Time : 3790ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 499999.875000 nodes in avg
+Overal explore rate: 1055408.707124
+Avg explore rate: 131926.088391
+Custom HDA OpenMP 16
+Total Time : 3139ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 249999.937500 nodes in avg
+Overal explore rate: 1274290.856961
+Avg explore rate: 79643.178560
+Custom HDA OpenMP 32
+Total Time : 3505ms
+shortest path length : 2147483647
+Explore 3999999 nodes in total
+Explore 124999.968750 nodes in avg
+Overal explore rate: 1141226.533524
+Avg explore rate: 35663.329173
+PLA OpenMP 1
+Total Time : 7595ms
+shortest path length : 2147483647
+Explore 3999998 nodes in total
+Explore 3999998.000000 nodes in avg
+Overal explore rate: 526662.014483
+Avg explore rate: 526662.014483
+PLA OpenMP 2
+Total Time : 2845ms
+shortest path length : 2147483647
+Explore 3999984 nodes in total
+Explore 1999992.000000 nodes in avg
+Overal explore rate: 1405969.771529
+Avg explore rate: 702984.885764
+PLA OpenMP 4
+Total Time : 2169ms
+shortest path length : 2147483647
+Explore 3999774 nodes in total
+Explore 999943.500000 nodes in avg
+Overal explore rate: 1844063.623790
+Avg explore rate: 461015.905947
+PLA OpenMP 8
+Total Time : 2236ms
+shortest path length : 2147483647
+Explore 3999545 nodes in total
+Explore 499943.125000 nodes in avg
+Overal explore rate: 1788705.277281
+Avg explore rate: 223588.159660
+PLA OpenMP 16
+Total Time : 3145ms
+shortest path length : 2147483647
+Explore 3999413 nodes in total
+Explore 249963.312500 nodes in avg
+Overal explore rate: 1271673.449921
+Avg explore rate: 79479.590620
+PLA OpenMP 32
+Total Time : 4345ms
+shortest path length : 2147483647
+Explore 3997931 nodes in total
+Explore 124935.343750 nodes in avg
+Overal explore rate: 920122.209436
+Avg explore rate: 28753.819045
