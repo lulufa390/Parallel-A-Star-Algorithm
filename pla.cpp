@@ -241,9 +241,9 @@ TestResult* find_path_pla(const Map* map, int thread_count) {
 
 
 
-    for (int i = 0; i < thread_count; i++) {
-        std::cout << "thread " << i << ": " << thread_array[i].count << std::endl;
-    }
+    // for (int i = 0; i < thread_count; i++) {
+    //     std::cout << "thread " << i << ": " << thread_array[i].count << std::endl;
+    // }
 
     test_result->shortest = optimal_length;
     for (int i = 0; i < thread_count; i++) {
