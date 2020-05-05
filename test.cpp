@@ -10,6 +10,7 @@
 
 #include <string>
 #include <chrono>
+#include <fstream>
 
 using namespace std;
 
@@ -60,29 +61,60 @@ typedef struct test_t
     }
 } test_t;
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc < 2) {
+        cout << "Please input maze file name" << endl;
+        return 0;
+    }
 
     cout << "Init" << endl;
-    string test_file_name = "maze_case/maze_1000_1000.txt";
-    Map *map = new Map(test_file_name, true);
+    // string test_file_name = "maze_case/maze_1000_1000.txt";
+    string test_file_name(argv[1]);
+    ifstream input(test_file_name, ifstream::in);
+    if (!input) {
+        cout << "Bad input file: " << test_file_name << endl;
+        return 0;
+    } else {
+        cout << "Loading input file: " << test_file_name << endl;
+    }
+    Map *map = new Map(input, false);
     cout << "Init done" << endl;
 
     vector<test_t> tests({
-                        // {&find_path_sequential, "Sequential", 1},
+                        {&find_path_sequential, "Sequential", 1},
                           {&find_path_bidirectional, "Bidirection", 2},
                           {&find_path_bidirectional_custom, "Custom bidirection", 2},
-                        //   {&find_path_spa, "SPA", 1},
-                        //   {&find_path_spa, "SPA", 2},
-                        //   {&find_path_spa_custom, "Custom SPA", 2},
-                        //   {&find_path_spa, "SPA", 4},
-                        //   {&find_path_hda_openmp, "HDA OpenMP", 1},
-                        //   {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 1},
-                        //   {&find_path_hda_openmp, "HDA OpenMP", 2},
-                        //   {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 2},
-                        //   {&find_path_hda_openmp, "HDA OpenMP", 4},
-                        //   {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 4},
-                        //   {&find_path_pla, "PLA OpenMP", 4}
+                          {&find_path_spa, "SPA", 1},
+                          {&find_path_spa, "SPA", 2},
+                          {&find_path_spa, "SPA", 4},
+                          {&find_path_spa, "SPA", 8},
+                          {&find_path_spa, "SPA", 16},
+                          {&find_path_spa, "SPA", 32},
+                          {&find_path_spa_custom, "Custom SPA", 1},
+                          {&find_path_spa_custom, "Custom SPA", 2},
+                          {&find_path_spa_custom, "Custom SPA", 4},
+                          {&find_path_spa_custom, "Custom SPA", 8},
+                          {&find_path_spa_custom, "Custom SPA", 16},
+                          {&find_path_spa_custom, "Custom SPA", 32},
+                          {&find_path_hda_openmp, "HDA OpenMP", 1},
+                          {&find_path_hda_openmp, "HDA OpenMP", 2},
+                          {&find_path_hda_openmp, "HDA OpenMP", 4},
+                          {&find_path_hda_openmp, "HDA OpenMP", 8},
+                          {&find_path_hda_openmp, "HDA OpenMP", 16},
+                          {&find_path_hda_openmp, "HDA OpenMP", 32},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 1},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 2},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 4},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 8},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 16},
+                          {&find_path_hda_openmp_custom, "Custom HDA OpenMP", 32},
+                          {&find_path_pla, "PLA OpenMP", 1},
+                          {&find_path_pla, "PLA OpenMP", 2},
+                          {&find_path_pla, "PLA OpenMP", 4},
+                          {&find_path_pla, "PLA OpenMP", 8},
+                          {&find_path_pla, "PLA OpenMP", 16},
+                          {&find_path_pla, "PLA OpenMP", 32}
                         });
 
     for (int i = 0; i < tests.size(); i++)

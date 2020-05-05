@@ -71,9 +71,9 @@ public:
     int width, height;
 
 public:
-    Map(string fileName, bool block_goal = false)
+    Map(ifstream& input, bool block_goal = false)
     {
-        ifstream input(fileName, ifstream::in);
+        // ifstream input(fileName, ifstream::in);
         // int height, width;
         input >> width >> height;
 
