@@ -37,6 +37,17 @@ def write_to_csv(file, metrics):
         csvwriter.writerows(rows) 
 
 if __name__ == "__main__":
-    metric = read_file("100_100.txt")
-    test_name, thread_count, total_time, shortest, total_explore, avg_explore, explore_rate, avg_explore_rate = metric[0]
-    write_to_csv("data.csv", metric)
+    exp_list = [
+        "100_100",
+        "1000_1000",
+        "2000_2000",
+        "4000_4000",
+        "100_100_no_goal",
+        "1000_1000_no_goal",
+        "2000_2000_no_goal",
+        "4000_4000_no_goal",
+    ]
+
+    for exp in exp_list:
+        metric = read_file(exp + ".txt")
+        write_to_csv(exp + ".csv", metric)
