@@ -1,3 +1,5 @@
+import csv  
+
 def get_element(line, prefix, suffix=""):
     if suffix == "":
         return line[len(prefix):]
@@ -22,5 +24,19 @@ def read_file(file_name):
     cases = [lines[i*7:i*7+7] for i in range(len(lines)//7)]
     return [read_case(case) for case in cases]
 
-metric = read_file("exp_result/100_100.txt")
-test_name, thread_count, total_time, shortest, total_explore, avg_explore, explore_rate, avg_explore_rate = metric[0]
+
+def write_to_csv(file, metrics):
+
+    fields = ['test_name', 'thread_count', 'total_time', 'shortest', 'total_explore', 'avg_explore', 'explore_rate', 'avg_explore_rate']  
+
+    rows = [list(metric) for metric in metrics]
+
+    with open(file, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fields)
+        csvwriter.writerows(rows) 
+
+if __name__ == "__main__":
+    metric = read_file("100_100.txt")
+    test_name, thread_count, total_time, shortest, total_explore, avg_explore, explore_rate, avg_explore_rate = metric[0]
+    write_to_csv("data.csv", metric)
